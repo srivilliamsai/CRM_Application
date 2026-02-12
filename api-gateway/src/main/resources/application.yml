@@ -19,12 +19,12 @@ spring:
         - id: customer-service
           uri: lb://customer-service
           predicates:
-            - Path=/api/customers/**, /api/leads/**
+            - Path=/api/customers/**, /api/leads/**, /api/activities/**, /api/notes/**
 
         - id: sales-service
           uri: lb://sales-service
           predicates:
-            - Path=/api/deals/**, /api/opportunities/**
+            - Path=/api/deals/**, /api/opportunities/**, /api/followups/**
 
         - id: marketing-service
           uri: lb://marketing-service
