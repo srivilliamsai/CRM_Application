@@ -1,48 +1,63 @@
-# ========================
-# Java / Maven
-# ========================
+# ============ Java / Spring Boot ============
 target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-
-# ========================
-# IDE — IntelliJ / Eclipse / VS Code
-# ========================
-.idea/
-*.iws
-*.iml
-*.ipr
-.classpath
-.project
-.settings/
-.factorypath
-bin/
-.vscode/
-
-# ========================
-# OS Files
-# ========================
-.DS_Store
-Thumbs.db
-
-# ========================
-# Logs
-# ========================
-*.log
-logs/
-
-# ========================
-# Spring Boot
-# ========================
+*.class
 *.jar
 *.war
 *.ear
+*.log
+hs_err_pid*
 
-# ========================
-# Environment / Secrets
-# ========================
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+mvnw
+mvnw.cmd
+
+# Gradle
+.gradle/
+build/
+gradle/
+gradlew
+gradlew.bat
+
+# ============ IDE ============
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# VS Code
+.vscode/
+
+# ============ Frontend (Node / Vite) ============
+node_modules/
+dist/
 .env
-*.env
-application-local.yml
-application-local.properties
+.env.local
+.env.*.local
+*.local
+
+# ============ OS Files ============
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============ Logs ============
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============ Misc ============
+*.swp
+*.swo
+*~
+.gemini/
+.factorypath

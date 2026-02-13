@@ -34,6 +34,9 @@
         <module>marketing-service</module>
         <module>support-service</module>
         <module>analytics-service</module>
+        <module>workflow-service</module>
+        <module>integration-service</module>
+        <module>notification-service</module>
     </modules>
 
     <dependencyManagement>

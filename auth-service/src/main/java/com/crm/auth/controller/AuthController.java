@@ -41,4 +41,23 @@ public class AuthController {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * GET /api/auth/users
+     * Get all users
+     */
+    @GetMapping("/users")
+    public ResponseEntity<java.util.List<com.crm.auth.dto.UserDTO>> getAllUsers() {
+        return ResponseEntity.ok(authService.getAllUsers());
+    }
+
+    /**
+     * GET /api/auth/users/company/{companyId}
+     * Get users filtered by companyId (UUID)
+     */
+    @GetMapping("/users/company/{companyId}")
+    public ResponseEntity<java.util.List<com.crm.auth.dto.UserDTO>> getUsersByCompanyId(
+            @PathVariable String companyId) {
+        return ResponseEntity.ok(authService.getUsersByCompanyId(companyId));
+    }
 }

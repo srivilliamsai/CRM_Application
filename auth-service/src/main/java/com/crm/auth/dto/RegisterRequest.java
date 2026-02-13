@@ -23,5 +23,7 @@ public class RegisterRequest {
 
     private String fullName;
     private String phone;
+    private String companyName;
+    private String companyId;
     private String role; // e.g., "ROLE_SALES"
 }

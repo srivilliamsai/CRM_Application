@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,9 +62,18 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
+        user.setCompanyName(request.getCompanyName());
 
-        // Assign role
-        String roleName = request.getRole() != null ? request.getRole() : "ROLE_USER";
+        // companyId: use provided one (for team members) or generate new UUID (for
+        // admin signup)
+        if (request.getCompanyId() != null && !request.getCompanyId().isEmpty()) {
+            user.setCompanyId(request.getCompanyId());
+        } else {
+            user.setCompanyId(UUID.randomUUID().toString());
+        }
+
+        // Assign role – public signups default to ROLE_ADMIN
+        String roleName = request.getRole() != null ? request.getRole() : "ROLE_ADMIN";
         Role role = roleRepository.findByName(Role.RoleName.valueOf(roleName))
                 .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
         user.setRoles(Collections.singleton(role));
@@ -79,9 +89,7 @@ public class AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
-                        request.getPassword()
-                )
-        );
+                        request.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
@@ -91,9 +99,47 @@ public class AuthService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        User user = userRepository.findByUsername(request.getUsername())
+        User user = userRepository.findByUsernameOrEmail(request.getUsername(), request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return new AuthResponse(jwt, user.getId(), user.getUsername(), user.getEmail(), roles);
+        return new AuthResponse(jwt, user.getId(), user.getUsername(), user.getEmail(),
+                user.getFullName(), user.getCompanyName(), user.getCompanyId(), roles);
+    }
+
+    public List<String> getRoles(User user) {
+        return user.getRoles().stream()
+                .map(role -> role.getName().name())
+                .collect(Collectors.toList());
+    }
+
+    private com.crm.auth.dto.UserDTO toUserDTO(User user) {
+        return new com.crm.auth.dto.UserDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getPhone(),
+                user.getCompanyName(),
+                user.getCompanyId(),
+                getRoles(user),
+                user.isEnabled());
+    }
+
+    /**
+     * Get all users
+     */
+    public List<com.crm.auth.dto.UserDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::toUserDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get users filtered by companyId (UUID)
+     */
+    public List<com.crm.auth.dto.UserDTO> getUsersByCompanyId(String companyId) {
+        return userRepository.findByCompanyId(companyId).stream()
+                .map(this::toUserDTO)
+                .collect(Collectors.toList());
     }
 }

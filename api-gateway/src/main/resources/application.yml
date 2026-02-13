@@ -41,6 +41,21 @@ spring:
           predicates:
             - Path=/api/analytics/**, /api/reports/**
 
+        - id: workflow-service
+          uri: lb://workflow-service
+          predicates:
+            - Path=/api/workflows/**
+
+        - id: integration-service
+          uri: lb://integration-service
+          predicates:
+            - Path=/api/integrations/**
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+
 eureka:
   client:
     service-url:
