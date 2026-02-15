@@ -9,11 +9,13 @@ import java.util.List;
 @Repository
 public interface DealRepository extends JpaRepository<Deal, Long> {
 
-    List<Deal> findByStage(Deal.DealStage stage);
+    List<Deal> findByCompanyId(String companyId);
 
-    List<Deal> findByCustomerId(Long customerId);
+    List<Deal> findByCompanyIdAndStage(String companyId, Deal.DealStage stage);
 
-    List<Deal> findByAssignedTo(Long userId);
+    List<Deal> findByCompanyIdAndCustomerId(String companyId, Long customerId);
 
-    List<Deal> findByPriority(String priority);
+    List<Deal> findByCompanyIdAndAssignedTo(String companyId, Long userId);
+
+    List<Deal> findByCompanyIdAndPriority(String companyId, String priority);
 }

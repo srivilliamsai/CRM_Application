@@ -32,7 +32,7 @@ export default function Changelog() {
                         <li>Two-way sync now supports Outlook calendars and contacts.</li>
                         <li>Improved email parsing for faster lead capture from web forms.</li>
                         <li>Added "Snooze" functionality to the Smart Inbox to handle emails later.</li>
-                        <li>Fixed a bug where attachments >25MB were failing to sync.</li>
+                        <li>Fixed a bug where attachments &gt;25MB were failing to sync.</li>
                     </ul>
                 </ChangelogEntry>
 

@@ -10,11 +10,14 @@ import java.util.Optional;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
-    Optional<Customer> findByEmail(String email);
+    List<Customer> findByCompanyId(String companyId);
 
-    List<Customer> findByStatus(Customer.CustomerStatus status);
+    Optional<Customer> findByEmailAndCompanyId(String email, String companyId);
 
-    List<Customer> findByCompanyContainingIgnoreCase(String company);
+    List<Customer> findByCompanyIdAndStatus(String companyId, Customer.CustomerStatus status);
 
-    List<Customer> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String firstName, String lastName);
+    List<Customer> findByCompanyIdAndCompanyContainingIgnoreCase(String companyId, String company);
+
+    List<Customer> findByCompanyIdAndFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String companyId,
+            String firstName, String lastName);
 }

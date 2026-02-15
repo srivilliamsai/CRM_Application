@@ -1,13 +1,10 @@
 package com.crm.auth.service;
 
-import com.crm.auth.config.JwtTokenProvider;
-import com.crm.auth.dto.AuthResponse;
-import com.crm.auth.dto.LoginRequest;
-import com.crm.auth.dto.RegisterRequest;
-import com.crm.auth.entity.Role;
-import com.crm.auth.entity.User;
-import com.crm.auth.repository.RoleRepository;
-import com.crm.auth.repository.UserRepository;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,10 +15,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.crm.auth.config.JwtTokenProvider;
+import com.crm.auth.dto.AuthResponse;
+import com.crm.auth.dto.LoginRequest;
+import com.crm.auth.dto.RegisterRequest;
+import com.crm.auth.entity.Role;
+import com.crm.auth.entity.User;
+import com.crm.auth.repository.RoleRepository;
+import com.crm.auth.repository.UserRepository;
 
 @Service
 public class AuthService {
@@ -102,8 +103,17 @@ public class AuthService {
         User user = userRepository.findByUsernameOrEmail(request.getUsername(), request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        java.util.Set<String> permissions = new java.util.HashSet<>();
+        if (user.getRoles() != null) {
+            user.getRoles().forEach(role -> {
+                if (role.getPermissions() != null) {
+                    role.getPermissions().forEach(p -> permissions.add(p.getName()));
+                }
+            });
+        }
+
         return new AuthResponse(jwt, user.getId(), user.getUsername(), user.getEmail(),
-                user.getFullName(), user.getCompanyName(), user.getCompanyId(), roles);
+                user.getFullName(), user.getCompanyName(), user.getCompanyId(), roles, permissions);
     }
 
     public List<String> getRoles(User user) {

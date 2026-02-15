@@ -1,6 +1,7 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import Topbar from '../components/Topbar';
+import TopBar from '../components/TopBar';
 import { getUser } from '../services/api';
 
 import LeadsPage from './dashboard/LeadsPage';
@@ -12,12 +13,23 @@ import TeamPage from './dashboard/TeamPage';
 import HelpPage from './dashboard/HelpPage';
 import SalesDashboard from './dashboard/SalesDashboard';
 import MarketingDashboard from './dashboard/MarketingDashboard';
+import CampaignsPage from './dashboard/CampaignsPage';
 import SupportDashboard from './dashboard/SupportDashboard';
+import TicketsPage from './dashboard/TicketsPage';
 import AdminDashboard from './dashboard/AdminDashboard';
 
 export default function Dashboard() {
     const user = getUser();
     const role = user?.roles?.[0] || 'ROLE_USER';
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+        }
+    }, [user, navigate]);
+
+    if (!user) return null; // Prevent rendering if not logged in
 
     const getDashboardByRole = () => {
         // console.log("Current Role:", role); // for debugging if needed
@@ -39,7 +51,7 @@ export default function Dashboard() {
             <Sidebar />
 
             <div className="flex-1 lg:ml-64 flex flex-col min-h-screen transition-all duration-300">
-                <Topbar />
+                <TopBar />
 
                 <main className="flex-1 pt-24 pb-12 px-6 overflow-y-auto">
                     <Routes>
@@ -47,6 +59,8 @@ export default function Dashboard() {
                         <Route path="/leads" element={<LeadsPage />} />
                         <Route path="/customers" element={<CustomersPage />} />
                         <Route path="/deals" element={<DealsPage />} />
+                        <Route path="/marketing" element={<CampaignsPage />} />
+                        <Route path="/tickets" element={<TicketsPage />} />
                         <Route path="/reports" element={<ReportsPage />} />
                         <Route path="/team" element={<TeamPage />} />
                         <Route path="/settings" element={<SettingsPage />} />

@@ -26,8 +26,8 @@ public class CustomerController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Customer>> getAllCustomers() {
-        return ResponseEntity.ok(customerService.getAllCustomers());
+    public ResponseEntity<List<Customer>> getAllCustomers(@RequestParam String companyId) {
+        return ResponseEntity.ok(customerService.getAllCustomers(companyId));
     }
 
     @GetMapping("/{id}")
@@ -36,13 +36,14 @@ public class CustomerController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Customer>> searchCustomers(@RequestParam String keyword) {
-        return ResponseEntity.ok(customerService.searchCustomers(keyword));
+    public ResponseEntity<List<Customer>> searchCustomers(@RequestParam String keyword,
+            @RequestParam String companyId) {
+        return ResponseEntity.ok(customerService.searchCustomers(companyId, keyword));
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Customer>> getByStatus(@PathVariable String status) {
-        return ResponseEntity.ok(customerService.getCustomersByStatus(status));
+    public ResponseEntity<List<Customer>> getByStatus(@PathVariable String status, @RequestParam String companyId) {
+        return ResponseEntity.ok(customerService.getCustomersByStatus(companyId, status));
     }
 
     @PutMapping("/{id}")

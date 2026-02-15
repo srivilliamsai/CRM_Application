@@ -1,13 +1,26 @@
 package com.crm.support.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "tickets")
@@ -37,9 +50,12 @@ public class Ticket {
     @Column(length = 50)
     private String category; // Billing, Technical, General, Feature Request
 
-    private Long customerId;  // from customer-service
-    private Long assignedTo;  // from auth-service
+    private Long customerId; // from customer-service
+    private Long assignedTo; // from auth-service
     private Long createdBy;
+
+    @Column(length = 36)
+    private String companyId;
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TicketResponse> responses = new ArrayList<>();

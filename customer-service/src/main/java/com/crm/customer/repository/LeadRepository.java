@@ -9,11 +9,13 @@ import java.util.List;
 @Repository
 public interface LeadRepository extends JpaRepository<Lead, Long> {
 
-    List<Lead> findByStatus(Lead.LeadStatus status);
+    List<Lead> findByCompanyId(String companyId);
 
-    List<Lead> findByAssignedTo(Long userId);
+    List<Lead> findByCompanyIdAndStatus(String companyId, Lead.LeadStatus status);
 
-    List<Lead> findBySource(String source);
+    List<Lead> findByCompanyIdAndAssignedTo(String companyId, Long userId);
 
-    List<Lead> findByScoreGreaterThanEqual(Integer score);
+    List<Lead> findByCompanyIdAndSource(String companyId, String source);
+
+    List<Lead> findByCompanyIdAndScoreGreaterThanEqual(String companyId, Integer score);
 }

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -35,10 +36,13 @@ public class Deal {
 
     private Long assignedTo; // User ID from auth-service
 
+    @Column(length = 36)
+    private String companyId;
+
     @Column(length = 50)
     private String priority; // LOW, MEDIUM, HIGH
 
-    private LocalDateTime expectedCloseDate;
+    private LocalDate expectedCloseDate;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;

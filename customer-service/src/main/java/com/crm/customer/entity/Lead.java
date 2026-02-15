@@ -44,6 +44,9 @@ public class Lead {
 
     private Long assignedTo; // User ID from auth-service
 
+    @Column(length = 36)
+    private String companyId; // Company isolation
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 

@@ -2,6 +2,7 @@ package com.crm.customer.controller;
 
 import com.crm.customer.dto.LeadDTO;
 import com.crm.customer.entity.Lead;
+import com.crm.customer.entity.LeadHistory;
 import com.crm.customer.service.LeadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,8 +27,8 @@ public class LeadController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Lead>> getAllLeads() {
-        return ResponseEntity.ok(leadService.getAllLeads());
+    public ResponseEntity<List<Lead>> getAllLeads(@RequestParam String companyId) {
+        return ResponseEntity.ok(leadService.getAllLeads(companyId));
     }
 
     @GetMapping("/{id}")
@@ -36,18 +37,19 @@ public class LeadController {
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Lead>> getLeadsByStatus(@PathVariable String status) {
-        return ResponseEntity.ok(leadService.getLeadsByStatus(status));
+    public ResponseEntity<List<Lead>> getLeadsByStatus(@PathVariable String status, @RequestParam String companyId) {
+        return ResponseEntity.ok(leadService.getLeadsByStatus(companyId, status));
     }
 
     @GetMapping("/assigned/{userId}")
-    public ResponseEntity<List<Lead>> getLeadsByAssignee(@PathVariable Long userId) {
-        return ResponseEntity.ok(leadService.getLeadsByAssignee(userId));
+    public ResponseEntity<List<Lead>> getLeadsByAssignee(@PathVariable Long userId, @RequestParam String companyId) {
+        return ResponseEntity.ok(leadService.getLeadsByAssignee(companyId, userId));
     }
 
     @GetMapping("/high-score")
-    public ResponseEntity<List<Lead>> getHighScoreLeads(@RequestParam(defaultValue = "70") Integer minScore) {
-        return ResponseEntity.ok(leadService.getHighScoreLeads(minScore));
+    public ResponseEntity<List<Lead>> getHighScoreLeads(@RequestParam(defaultValue = "70") Integer minScore,
+            @RequestParam String companyId) {
+        return ResponseEntity.ok(leadService.getHighScoreLeads(companyId, minScore));
     }
 
     @PutMapping("/{id}")
@@ -58,6 +60,11 @@ public class LeadController {
     @PutMapping("/{id}/status")
     public ResponseEntity<Lead> updateLeadStatus(@PathVariable Long id, @RequestParam String status) {
         return ResponseEntity.ok(leadService.updateLeadStatus(id, status));
+    }
+
+    @GetMapping("/{id}/history")
+    public ResponseEntity<List<LeadHistory>> getLeadHistory(@PathVariable Long id) {
+        return ResponseEntity.ok(leadService.getLeadHistory(id));
     }
 
     @DeleteMapping("/{id}")

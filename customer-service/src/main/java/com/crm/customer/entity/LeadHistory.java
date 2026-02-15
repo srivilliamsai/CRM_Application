@@ -8,39 +8,38 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notes")
+@Table(name = "lead_history")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Note {
+public class LeadHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String content;
+    @Column(nullable = false)
+    private Long leadId;
 
-    private Long customerId;
+    @Column(nullable = false, length = 50)
+    private String fieldChanged; // e.g. "STATUS", "SCORE", "NOTE"
 
-    private Long createdBy; // User ID from auth-service
+    @Column(length = 500)
+    private String oldValue;
+
+    @Column(length = 500)
+    private String newValue;
+
+    private Long changedBy; // User ID
 
     @Column(length = 36)
     private String companyId;
 
     @Column(updatable = false)
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
+    private LocalDateTime changedAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        changedAt = LocalDateTime.now();
     }
 }

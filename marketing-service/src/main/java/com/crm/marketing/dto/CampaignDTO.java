@@ -18,5 +18,11 @@ public class CampaignDTO {
     private String status;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private Double budget;
+    private String goal;
     private Integer targetAudience;
+    private Integer sentCount;
+    private Integer openCount;
+    private Integer clickCount;
+    private String companyId;
 }

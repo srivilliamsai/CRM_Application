@@ -1,17 +1,28 @@
 package com.crm.support.controller;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.crm.support.dto.TicketDTO;
 import com.crm.support.entity.Ticket;
 import com.crm.support.entity.TicketResponse;
 import com.crm.support.service.TicketService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tickets")
@@ -27,8 +38,8 @@ public class TicketController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Ticket>> getAllTickets() {
-        return ResponseEntity.ok(ticketService.getAllTickets());
+    public ResponseEntity<List<Ticket>> getAllTickets(@RequestParam String companyId) {
+        return ResponseEntity.ok(ticketService.getAllTickets(companyId));
     }
 
     @GetMapping("/{id}")
@@ -37,13 +48,15 @@ public class TicketController {
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Ticket>> getTicketsByStatus(@PathVariable String status) {
-        return ResponseEntity.ok(ticketService.getTicketsByStatus(status));
+    public ResponseEntity<List<Ticket>> getTicketsByStatus(@PathVariable String status,
+            @RequestParam String companyId) {
+        return ResponseEntity.ok(ticketService.getTicketsByStatus(companyId, status));
     }
 
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<Ticket>> getTicketsByCustomer(@PathVariable Long customerId) {
-        return ResponseEntity.ok(ticketService.getTicketsByCustomer(customerId));
+    public ResponseEntity<List<Ticket>> getTicketsByCustomer(@PathVariable Long customerId,
+            @RequestParam String companyId) {
+        return ResponseEntity.ok(ticketService.getTicketsByCustomer(companyId, customerId));
     }
 
     @PutMapping("/{id}")

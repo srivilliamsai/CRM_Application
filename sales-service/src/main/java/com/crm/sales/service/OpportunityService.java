@@ -14,11 +14,12 @@ public class OpportunityService {
     private OpportunityRepository opportunityRepository;
 
     public Opportunity createOpportunity(Opportunity opportunity) {
+        // Enforce companyId from context or object
         return opportunityRepository.save(opportunity);
     }
 
-    public List<Opportunity> getAllOpportunities() {
-        return opportunityRepository.findAll();
+    public List<Opportunity> getAllOpportunities(String companyId) {
+        return opportunityRepository.findByCompanyId(companyId);
     }
 
     public Opportunity getOpportunityById(Long id) {
@@ -26,16 +27,17 @@ public class OpportunityService {
                 .orElseThrow(() -> new RuntimeException("Opportunity not found with id: " + id));
     }
 
-    public List<Opportunity> getOpportunitiesByStatus(String status) {
-        return opportunityRepository.findByStatus(Opportunity.OpportunityStatus.valueOf(status.toUpperCase()));
+    public List<Opportunity> getOpportunitiesByStatus(String companyId, String status) {
+        return opportunityRepository.findByCompanyIdAndStatus(companyId,
+                Opportunity.OpportunityStatus.valueOf(status.toUpperCase()));
     }
 
-    public List<Opportunity> getOpportunitiesByCustomer(Long customerId) {
-        return opportunityRepository.findByCustomerId(customerId);
+    public List<Opportunity> getOpportunitiesByCustomer(String companyId, Long customerId) {
+        return opportunityRepository.findByCompanyIdAndCustomerId(companyId, customerId);
     }
 
-    public List<Opportunity> getHighProbabilityOpportunities(Integer minProbability) {
-        return opportunityRepository.findByProbabilityGreaterThanEqual(minProbability);
+    public List<Opportunity> getHighProbabilityOpportunities(String companyId, Integer minProbability) {
+        return opportunityRepository.findByCompanyIdAndProbabilityGreaterThanEqual(companyId, minProbability);
     }
 
     public Opportunity updateOpportunity(Long id, Opportunity opportunity) {
@@ -46,7 +48,10 @@ public class OpportunityService {
         existing.setSource(opportunity.getSource());
         existing.setCustomerId(opportunity.getCustomerId());
         existing.setAssignedTo(opportunity.getAssignedTo());
-        if (opportunity.getStatus() != null) existing.setStatus(opportunity.getStatus());
+        if (opportunity.getCompanyId() != null)
+            existing.setCompanyId(opportunity.getCompanyId());
+        if (opportunity.getStatus() != null)
+            existing.setStatus(opportunity.getStatus());
         return opportunityRepository.save(existing);
     }
 

@@ -32,8 +32,14 @@ public class Campaign {
     @Column(length = 20)
     private CampaignStatus status = CampaignStatus.DRAFT;
 
+    @Column(length = 36)
+    private String companyId;
+
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+
+    private Double budget;
+    private String goal;
 
     private Integer targetAudience = 0;
     private Integer sentCount = 0;

@@ -9,7 +9,9 @@ import java.util.List;
 @Repository
 public interface EmailTemplateRepository extends JpaRepository<EmailTemplate, Long> {
 
-    List<EmailTemplate> findByCategory(String category);
+    List<EmailTemplate> findByCompanyId(String companyId);
 
-    List<EmailTemplate> findByActiveTrue();
+    List<EmailTemplate> findByCompanyIdAndCategory(String companyId, String category);
+
+    List<EmailTemplate> findByCompanyIdAndActiveTrue(String companyId);
 }

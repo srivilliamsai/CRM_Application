@@ -1,8 +1,8 @@
 package com.crm.auth.dto;
 
-import lombok.Data;
-
 import javax.validation.constraints.NotBlank;
+
+import lombok.Data;
 
 @Data
 public class LoginRequest {

@@ -4,7 +4,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 public class DealDTO {
@@ -19,6 +19,7 @@ public class DealDTO {
     private String stage;
     private Long customerId;
     private Long assignedTo;
+    private String companyId;
     private String priority;
-    private LocalDateTime expectedCloseDate;
+    private LocalDate expectedCloseDate;
 }

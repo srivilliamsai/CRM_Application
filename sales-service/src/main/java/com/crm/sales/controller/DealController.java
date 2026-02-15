@@ -25,8 +25,8 @@ public class DealController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Deal>> getAllDeals() {
-        return ResponseEntity.ok(dealService.getAllDeals());
+    public ResponseEntity<List<Deal>> getAllDeals(@RequestParam String companyId) {
+        return ResponseEntity.ok(dealService.getAllDeals(companyId));
     }
 
     @GetMapping("/{id}")
@@ -35,18 +35,19 @@ public class DealController {
     }
 
     @GetMapping("/stage/{stage}")
-    public ResponseEntity<List<Deal>> getDealsByStage(@PathVariable String stage) {
-        return ResponseEntity.ok(dealService.getDealsByStage(stage));
+    public ResponseEntity<List<Deal>> getDealsByStage(@PathVariable String stage, @RequestParam String companyId) {
+        return ResponseEntity.ok(dealService.getDealsByStage(companyId, stage));
     }
 
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<Deal>> getDealsByCustomer(@PathVariable Long customerId) {
-        return ResponseEntity.ok(dealService.getDealsByCustomer(customerId));
+    public ResponseEntity<List<Deal>> getDealsByCustomer(@PathVariable Long customerId,
+            @RequestParam String companyId) {
+        return ResponseEntity.ok(dealService.getDealsByCustomer(companyId, customerId));
     }
 
     @GetMapping("/assigned/{userId}")
-    public ResponseEntity<List<Deal>> getDealsByAssignee(@PathVariable Long userId) {
-        return ResponseEntity.ok(dealService.getDealsByAssignee(userId));
+    public ResponseEntity<List<Deal>> getDealsByAssignee(@PathVariable Long userId, @RequestParam String companyId) {
+        return ResponseEntity.ok(dealService.getDealsByAssignee(companyId, userId));
     }
 
     @PutMapping("/{id}")

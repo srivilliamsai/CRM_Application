@@ -27,6 +27,9 @@ public class Segment {
     @Column(length = 500)
     private String criteria; // JSON or rule string, e.g. "industry=IT AND status=ACTIVE"
 
+    @Column(length = 36)
+    private String companyId;
+
     private Integer memberCount = 0;
 
     private Long createdBy;

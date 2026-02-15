@@ -29,6 +29,9 @@ public class Activity {
 
     private Long performedBy; // User ID from auth-service
 
+    @Column(length = 36)
+    private String companyId;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 

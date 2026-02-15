@@ -23,8 +23,8 @@ public class OpportunityController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Opportunity>> getAll() {
-        return ResponseEntity.ok(opportunityService.getAllOpportunities());
+    public ResponseEntity<List<Opportunity>> getAll(@RequestParam String companyId) {
+        return ResponseEntity.ok(opportunityService.getAllOpportunities(companyId));
     }
 
     @GetMapping("/{id}")
@@ -33,18 +33,20 @@ public class OpportunityController {
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Opportunity>> getByStatus(@PathVariable String status) {
-        return ResponseEntity.ok(opportunityService.getOpportunitiesByStatus(status));
+    public ResponseEntity<List<Opportunity>> getByStatus(@PathVariable String status, @RequestParam String companyId) {
+        return ResponseEntity.ok(opportunityService.getOpportunitiesByStatus(companyId, status));
     }
 
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<Opportunity>> getByCustomer(@PathVariable Long customerId) {
-        return ResponseEntity.ok(opportunityService.getOpportunitiesByCustomer(customerId));
+    public ResponseEntity<List<Opportunity>> getByCustomer(@PathVariable Long customerId,
+            @RequestParam String companyId) {
+        return ResponseEntity.ok(opportunityService.getOpportunitiesByCustomer(companyId, customerId));
     }
 
     @GetMapping("/high-probability")
-    public ResponseEntity<List<Opportunity>> getHighProbability(@RequestParam(defaultValue = "70") Integer minProbability) {
-        return ResponseEntity.ok(opportunityService.getHighProbabilityOpportunities(minProbability));
+    public ResponseEntity<List<Opportunity>> getHighProbability(
+            @RequestParam(defaultValue = "70") Integer minProbability, @RequestParam String companyId) {
+        return ResponseEntity.ok(opportunityService.getHighProbabilityOpportunities(companyId, minProbability));
     }
 
     @PutMapping("/{id}")

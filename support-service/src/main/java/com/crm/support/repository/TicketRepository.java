@@ -1,21 +1,22 @@
 package com.crm.support.repository;
 
-import com.crm.support.entity.Ticket;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.crm.support.entity.Ticket;
 
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
-    List<Ticket> findByStatus(Ticket.TicketStatus status);
+    List<Ticket> findByCompanyId(String companyId);
 
-    List<Ticket> findByPriority(Ticket.TicketPriority priority);
+    List<Ticket> findByCompanyIdAndStatus(String companyId, Ticket.TicketStatus status);
 
-    List<Ticket> findByCustomerId(Long customerId);
+    List<Ticket> findByCompanyIdAndCustomerId(String companyId, Long customerId);
 
-    List<Ticket> findByAssignedTo(Long userId);
+    List<Ticket> findByCompanyIdAndAssignedTo(String companyId, Long userId);
 
     long countByStatus(Ticket.TicketStatus status);
 }

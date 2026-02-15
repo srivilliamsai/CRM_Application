@@ -17,7 +17,8 @@ public class CustomerService {
     // ========== CREATE ==========
 
     public Customer createCustomer(CustomerDTO dto) {
-        if (dto.getEmail() != null && customerRepository.findByEmail(dto.getEmail()).isPresent()) {
+        if (dto.getEmail() != null
+                && customerRepository.findByEmailAndCompanyId(dto.getEmail(), dto.getCompanyId()).isPresent()) {
             throw new RuntimeException("Customer with this email already exists!");
         }
 
@@ -28,8 +29,8 @@ public class CustomerService {
 
     // ========== READ ==========
 
-    public List<Customer> getAllCustomers() {
-        return customerRepository.findAll();
+    public List<Customer> getAllCustomers(String companyId) {
+        return customerRepository.findByCompanyId(companyId);
     }
 
     public Customer getCustomerById(Long id) {
@@ -37,13 +38,15 @@ public class CustomerService {
                 .orElseThrow(() -> new RuntimeException("Customer not found with id: " + id));
     }
 
-    public List<Customer> searchCustomers(String keyword) {
+    public List<Customer> searchCustomers(String companyId, String keyword) {
         return customerRepository
-                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(keyword, keyword);
+                .findByCompanyIdAndFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(companyId, keyword,
+                        keyword);
     }
 
-    public List<Customer> getCustomersByStatus(String status) {
-        return customerRepository.findByStatus(Customer.CustomerStatus.valueOf(status.toUpperCase()));
+    public List<Customer> getCustomersByStatus(String companyId, String status) {
+        return customerRepository.findByCompanyIdAndStatus(companyId,
+                Customer.CustomerStatus.valueOf(status.toUpperCase()));
     }
 
     // ========== UPDATE ==========
@@ -78,6 +81,10 @@ public class CustomerService {
 
         if (dto.getStatus() != null) {
             customer.setStatus(Customer.CustomerStatus.valueOf(dto.getStatus().toUpperCase()));
+        }
+
+        if (dto.getCompanyId() != null) {
+            customer.setCompanyId(dto.getCompanyId());
         }
     }
 }

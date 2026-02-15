@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard, Users, UserPlus, FileText,
-    BarChart2, Settings, HelpCircle, LogOut
+    BarChart2, Settings, HelpCircle, LogOut, Megaphone, Headphones
 } from 'lucide-react';
 import { logout, getUser } from '../services/api';
 
@@ -15,9 +15,10 @@ export default function Sidebar() {
         navigate('/login');
     };
 
-    const NavItem = ({ to, icon, label }) => (
+    const NavItem = ({ to, icon, label, end }) => (
         <NavLink
             to={to}
+            end={end}
             className={({ isActive }) =>
                 `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
                     ? 'bg-primary text-white shadow-lg shadow-blue-500/30'
@@ -42,10 +43,12 @@ export default function Sidebar() {
                 <div className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Main
                 </div>
-                <NavItem to="/dashboard" icon={<LayoutDashboard size={20} />} label="Overview" />
+                <NavItem to="/dashboard" icon={<LayoutDashboard size={20} />} label="Overview" end />
                 <NavItem to="/dashboard/leads" icon={<UserPlus size={20} />} label="Leads" />
                 <NavItem to="/dashboard/customers" icon={<Users size={20} />} label="Customers" />
                 <NavItem to="/dashboard/deals" icon={<FileText size={20} />} label="Deals" />
+                <NavItem to="/dashboard/marketing" icon={<Megaphone size={20} />} label="Marketing" />
+                <NavItem to="/dashboard/tickets" icon={<Headphones size={20} />} label="Tickets" />
 
                 <div className="px-3 mt-8 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Analytics
@@ -60,15 +63,7 @@ export default function Sidebar() {
                 <NavItem to="/dashboard/help" icon={<HelpCircle size={20} />} label="Help & Support" />
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-                <button
-                    onClick={handleLogout}
-                    className="flex items-center space-x-3 px-4 py-3 w-full rounded-xl text-danger hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors w-full text-left"
-                >
-                    <LogOut size={20} />
-                    <span className="font-medium">Sign Out</span>
-                </button>
-            </div>
+            {/* User profile moved to TopBar */}
         </aside>
     );
 }

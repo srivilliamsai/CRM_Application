@@ -30,11 +30,14 @@ public class DealService {
 
         Deal deal = new Deal();
         mapDtoToEntity(dto, deal);
+        if (dto.getCompanyId() != null) {
+            deal.setCompanyId(dto.getCompanyId());
+        }
         return dealRepository.save(deal);
     }
 
-    public List<Deal> getAllDeals() {
-        return dealRepository.findAll();
+    public List<Deal> getAllDeals(String companyId) {
+        return dealRepository.findByCompanyId(companyId);
     }
 
     public Deal getDealById(Long id) {
@@ -42,16 +45,16 @@ public class DealService {
                 .orElseThrow(() -> new RuntimeException("Deal not found with id: " + id));
     }
 
-    public List<Deal> getDealsByStage(String stage) {
-        return dealRepository.findByStage(Deal.DealStage.valueOf(stage.toUpperCase()));
+    public List<Deal> getDealsByStage(String companyId, String stage) {
+        return dealRepository.findByCompanyIdAndStage(companyId, Deal.DealStage.valueOf(stage.toUpperCase()));
     }
 
-    public List<Deal> getDealsByCustomer(Long customerId) {
-        return dealRepository.findByCustomerId(customerId);
+    public List<Deal> getDealsByCustomer(String companyId, Long customerId) {
+        return dealRepository.findByCompanyIdAndCustomerId(companyId, customerId);
     }
 
-    public List<Deal> getDealsByAssignee(Long userId) {
-        return dealRepository.findByAssignedTo(userId);
+    public List<Deal> getDealsByAssignee(String companyId, Long userId) {
+        return dealRepository.findByCompanyIdAndAssignedTo(companyId, userId);
     }
 
     public Deal updateDeal(Long id, DealDTO dto) {

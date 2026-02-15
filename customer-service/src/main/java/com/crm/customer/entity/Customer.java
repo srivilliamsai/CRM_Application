@@ -55,6 +55,9 @@ public class Customer {
     @Column(length = 50)
     private String source; // e.g., Website, Referral, Campaign
 
+    @Column(length = 36)
+    private String companyId; // Company isolation
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 

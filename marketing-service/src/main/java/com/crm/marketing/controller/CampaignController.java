@@ -30,8 +30,8 @@ public class CampaignController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Campaign>> getAllCampaigns() {
-        return ResponseEntity.ok(campaignService.getAllCampaigns());
+    public ResponseEntity<List<Campaign>> getAllCampaigns(@RequestParam String companyId) {
+        return ResponseEntity.ok(campaignService.getAllCampaigns(companyId));
     }
 
     @GetMapping("/{id}")
@@ -40,8 +40,9 @@ public class CampaignController {
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Campaign>> getCampaignsByStatus(@PathVariable String status) {
-        return ResponseEntity.ok(campaignService.getCampaignsByStatus(status));
+    public ResponseEntity<List<Campaign>> getCampaignsByStatus(@PathVariable String status,
+            @RequestParam String companyId) {
+        return ResponseEntity.ok(campaignService.getCampaignsByStatus(companyId, status));
     }
 
     @PutMapping("/{id}")
@@ -63,8 +64,8 @@ public class CampaignController {
     // ============ Email Templates ============
 
     @GetMapping("/templates")
-    public ResponseEntity<List<EmailTemplate>> getAllTemplates() {
-        return ResponseEntity.ok(templateRepository.findByActiveTrue());
+    public ResponseEntity<List<EmailTemplate>> getAllTemplates(@RequestParam String companyId) {
+        return ResponseEntity.ok(templateRepository.findByCompanyIdAndActiveTrue(companyId));
     }
 
     @PostMapping("/templates")

@@ -32,6 +32,28 @@ const ANALYTICS_API = axios.create({
     headers: { 'Content-Type': 'application/json' },
 });
 
+const NOTIFICATION_API = axios.create({
+    baseURL: 'http://localhost:8089/api/notifications',
+    headers: { 'Content-Type': 'application/json' },
+});
+
+// Add a request interceptor to all APIs
+const addToken = (config) => {
+    const token = sessionStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+};
+
+AUTH_API.interceptors.request.use(addToken);
+CUSTOMER_API.interceptors.request.use(addToken);
+SALES_API.interceptors.request.use(addToken);
+MARKETING_API.interceptors.request.use(addToken);
+SUPPORT_API.interceptors.request.use(addToken);
+ANALYTICS_API.interceptors.request.use(addToken);
+NOTIFICATION_API.interceptors.request.use(addToken);
+
 // ============ Auth Service ============
 
 export const register = async (data) => {
@@ -63,6 +85,7 @@ export const saveAuth = (authResponse) => {
         companyName: authResponse.companyName,
         companyId: authResponse.companyId,
         roles: authResponse.roles,
+        permissions: authResponse.permissions,
     }));
 };
 
@@ -76,6 +99,11 @@ export const getToken = () => sessionStorage.getItem('token');
 export const getUser = () => {
     const user = sessionStorage.getItem('user');
     return user ? JSON.parse(user) : null;
+};
+
+export const getCompanyId = () => {
+    const user = getUser();
+    return user?.companyId;
 };
 
 export const forgotPassword = async (email) => {
@@ -93,7 +121,8 @@ export const resetPassword = async (token, newPassword) => {
 // ============ Leads (customer-service) ============
 
 export const getAllLeads = async () => {
-    const response = await CUSTOMER_API.get('/leads');
+    const companyId = getCompanyId();
+    const response = await CUSTOMER_API.get(`/leads?companyId=${companyId}`);
     return response.data;
 };
 
@@ -103,7 +132,8 @@ export const getLeadById = async (id) => {
 };
 
 export const createLead = async (data) => {
-    const response = await CUSTOMER_API.post('/leads', data);
+    const companyId = getCompanyId();
+    const response = await CUSTOMER_API.post('/leads', { ...data, companyId });
     return response.data;
 };
 
@@ -121,10 +151,16 @@ export const deleteLead = async (id) => {
     await CUSTOMER_API.delete(`/leads/${id}`);
 };
 
+export const getLeadHistory = async (id) => {
+    const response = await CUSTOMER_API.get(`/leads/${id}/history`);
+    return response.data;
+};
+
 // ============ Customers (customer-service) ============
 
 export const getAllCustomers = async () => {
-    const response = await CUSTOMER_API.get('/customers');
+    const companyId = getCompanyId();
+    const response = await CUSTOMER_API.get(`/customers?companyId=${companyId}`);
     return response.data;
 };
 
@@ -134,12 +170,14 @@ export const getCustomerById = async (id) => {
 };
 
 export const searchCustomers = async (keyword) => {
-    const response = await CUSTOMER_API.get(`/customers/search?keyword=${keyword}`);
+    const companyId = getCompanyId();
+    const response = await CUSTOMER_API.get(`/customers/search?keyword=${keyword}&companyId=${companyId}`);
     return response.data;
 };
 
 export const createCustomer = async (data) => {
-    const response = await CUSTOMER_API.post('/customers', data);
+    const companyId = getCompanyId();
+    const response = await CUSTOMER_API.post('/customers', { ...data, companyId });
     return response.data;
 };
 
@@ -152,10 +190,39 @@ export const deleteCustomer = async (id) => {
     await CUSTOMER_API.delete(`/customers/${id}`);
 };
 
+// ============ Notes (customer-service) ============
+
+export const getNotesByCustomer = async (customerId) => {
+    const response = await CUSTOMER_API.get(`/notes/customer/${customerId}`);
+    return response.data;
+};
+
+export const createNote = async (data) => {
+    const response = await CUSTOMER_API.post('/notes', data);
+    return response.data;
+};
+
+export const deleteNote = async (id) => {
+    await CUSTOMER_API.delete(`/notes/${id}`);
+};
+
+// ============ Activities (customer-service) ============
+
+export const getActivitiesByCustomer = async (customerId) => {
+    const response = await CUSTOMER_API.get(`/activities/customer/${customerId}`);
+    return response.data;
+};
+
+export const createActivity = async (data) => {
+    const response = await CUSTOMER_API.post('/activities', data);
+    return response.data;
+};
+
 // ============ Deals (sales-service) ============
 
 export const getAllDeals = async () => {
-    const response = await SALES_API.get('/deals');
+    const companyId = getCompanyId();
+    const response = await SALES_API.get(`/deals?companyId=${companyId}`);
     return response.data;
 };
 
@@ -165,12 +232,20 @@ export const getDealById = async (id) => {
 };
 
 export const getDealsByStage = async (stage) => {
-    const response = await SALES_API.get(`/deals/stage/${stage}`);
+    const companyId = getCompanyId();
+    const response = await SALES_API.get(`/deals/stage/${stage}?companyId=${companyId}`);
+    return response.data;
+};
+
+export const getDealsByCustomer = async (customerId) => {
+    const companyId = getCompanyId();
+    const response = await SALES_API.get(`/deals/customer/${customerId}?companyId=${companyId}`);
     return response.data;
 };
 
 export const createDeal = async (data) => {
-    const response = await SALES_API.post('/deals', data);
+    const companyId = getCompanyId();
+    const response = await SALES_API.post('/deals', { ...data, companyId });
     return response.data;
 };
 
@@ -191,7 +266,8 @@ export const deleteDeal = async (id) => {
 // ============ Followups (sales-service) ============
 
 export const getFollowupsByDeal = async (dealId) => {
-    const response = await SALES_API.get(`/followups/deal/${dealId}`);
+    const companyId = getCompanyId();
+    const response = await SALES_API.get(`/followups/deal/${dealId}?companyId=${companyId}`);
     return response.data;
 };
 
@@ -201,14 +277,16 @@ export const getPendingFollowups = async () => {
 };
 
 export const createFollowup = async (data) => {
-    const response = await SALES_API.post('/followups', data);
+    const companyId = getCompanyId();
+    const response = await SALES_API.post('/followups', { ...data, companyId });
     return response.data;
 };
 
 // ============ Campaigns (marketing-service) ============
 
 export const getAllCampaigns = async () => {
-    const response = await MARKETING_API.get('/campaigns');
+    const companyId = getCompanyId();
+    const response = await MARKETING_API.get(`/campaigns?companyId=${companyId}`);
     return response.data;
 };
 
@@ -218,7 +296,8 @@ export const getCampaignById = async (id) => {
 };
 
 export const createCampaign = async (data) => {
-    const response = await MARKETING_API.post('/campaigns', data);
+    const companyId = getCompanyId();
+    const response = await MARKETING_API.post('/campaigns', { ...data, companyId });
     return response.data;
 };
 
@@ -234,7 +313,8 @@ export const deleteCampaign = async (id) => {
 // ============ Tickets (support-service) ============
 
 export const getAllTickets = async () => {
-    const response = await SUPPORT_API.get('/tickets');
+    const companyId = getCompanyId();
+    const response = await SUPPORT_API.get(`/tickets?companyId=${companyId}`);
     return response.data;
 };
 
@@ -244,12 +324,20 @@ export const getTicketById = async (id) => {
 };
 
 export const getTicketsByStatus = async (status) => {
-    const response = await SUPPORT_API.get(`/tickets/status/${status}`);
+    const companyId = getCompanyId();
+    const response = await SUPPORT_API.get(`/tickets/status/${status}?companyId=${companyId}`);
+    return response.data;
+};
+
+export const getTicketsByCustomer = async (customerId) => {
+    const companyId = getCompanyId();
+    const response = await SUPPORT_API.get(`/tickets/customer/${customerId}?companyId=${companyId}`);
     return response.data;
 };
 
 export const createTicket = async (data) => {
-    const response = await SUPPORT_API.post('/tickets', data);
+    const companyId = getCompanyId();
+    const response = await SUPPORT_API.post('/tickets', { ...data, companyId });
     return response.data;
 };
 
@@ -267,6 +355,17 @@ export const deleteTicket = async (id) => {
     await SUPPORT_API.delete(`/tickets/${id}`);
 };
 
+export const getTicketResponses = async (id) => {
+    const response = await SUPPORT_API.get(`/tickets/${id}/responses`);
+    return response.data;
+};
+
+export const addTicketResponse = async (id, data) => {
+    // data should contain { message, respondedBy, responderType }
+    const response = await SUPPORT_API.post(`/tickets/${id}/responses`, data);
+    return response.data;
+};
+
 // ============ Analytics (analytics-service) ============
 
 export const getDashboardAnalytics = async () => {
@@ -276,6 +375,39 @@ export const getDashboardAnalytics = async () => {
 
 export const getAllReports = async () => {
     const response = await ANALYTICS_API.get('/analytics/reports');
+    return response.data;
+};
+
+// ============ Notifications (notification-service) ============
+
+// Notification API instance is already declared at the top
+
+export const getNotifications = async (userId) => {
+    const response = await NOTIFICATION_API.get(`/user/${userId}`);
+    return response.data;
+};
+
+export const getUnreadNotifications = async (userId) => {
+    const response = await NOTIFICATION_API.get(`/user/${userId}/unread`);
+    return response.data;
+};
+
+export const getUnreadCount = async (userId) => {
+    const response = await NOTIFICATION_API.get(`/user/${userId}/unread-count`);
+    return response.data; // returns { userId, unreadCount }
+};
+
+export const markAsRead = async (id) => {
+    const response = await NOTIFICATION_API.put(`/${id}/read`);
+    return response.data;
+};
+
+export const markAllAsRead = async (userId) => {
+    await NOTIFICATION_API.put(`/user/${userId}/read-all`);
+};
+
+export const sendNotification = async (data) => {
+    const response = await NOTIFICATION_API.post('', data);
     return response.data;
 };
 

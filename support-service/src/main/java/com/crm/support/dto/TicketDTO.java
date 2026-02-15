@@ -1,8 +1,8 @@
 package com.crm.support.dto;
 
-import lombok.Data;
-
 import javax.validation.constraints.NotBlank;
+
+import lombok.Data;
 
 @Data
 public class TicketDTO {
@@ -18,4 +18,5 @@ public class TicketDTO {
     private String category;
     private Long customerId;
     private Long assignedTo;
+    private String companyId;
 }

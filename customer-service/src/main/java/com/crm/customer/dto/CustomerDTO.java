@@ -9,6 +9,7 @@ import javax.validation.constraints.NotBlank;
 public class CustomerDTO {
 
     private Long id;
+    private String companyId;
 
     @NotBlank(message = "First name is required")
     private String firstName;

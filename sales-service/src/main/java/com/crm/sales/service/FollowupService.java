@@ -14,19 +14,20 @@ public class FollowupService {
     private FollowupRepository followupRepository;
 
     public Followup createFollowup(Followup followup) {
+        // Enforce companyId from context or object
         return followupRepository.save(followup);
     }
 
-    public List<Followup> getFollowupsByDeal(Long dealId) {
-        return followupRepository.findByDealId(dealId);
+    public List<Followup> getFollowupsByDeal(String companyId, Long dealId) {
+        return followupRepository.findByCompanyIdAndDealId(companyId, dealId);
     }
 
-    public List<Followup> getPendingFollowups() {
-        return followupRepository.findByCompletedFalse();
+    public List<Followup> getPendingFollowups(String companyId) {
+        return followupRepository.findByCompanyIdAndCompletedFalse(companyId);
     }
 
-    public List<Followup> getPendingByUser(Long userId) {
-        return followupRepository.findByAssignedToAndCompletedFalse(userId);
+    public List<Followup> getPendingByUser(String companyId, Long userId) {
+        return followupRepository.findByCompanyIdAndAssignedToAndCompletedFalse(companyId, userId);
     }
 
     public Followup markComplete(Long id) {

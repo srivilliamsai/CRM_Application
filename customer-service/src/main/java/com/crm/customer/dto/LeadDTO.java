@@ -20,4 +20,5 @@ public class LeadDTO {
     private Integer score;
     private String notes;
     private Long assignedTo;
+    private String companyId;
 }

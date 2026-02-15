@@ -1,20 +1,25 @@
 import { useState, useEffect } from 'react';
-import { getUser, getAllUsers, getAllCampaigns } from '../../services/api';
-import { ArrowUp, ArrowDown, Eye, MousePointer, Megaphone, Users, Mail, Globe, Share2, Zap, Plus } from 'lucide-react';
+import { getUser, getAllUsers, getAllCampaigns, getAllLeads, getAllCustomers } from '../../services/api';
+import { Megaphone, Mail, Eye, MousePointer, Target, TrendingUp, Users, DollarSign, ArrowUp, UserPlus } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 export default function MarketingDashboard() {
     const user = getUser();
     const firstName = user?.fullName?.split(' ')[0] || 'Marketer';
     const [marketingTeam, setMarketingTeam] = useState([]);
     const [campaigns, setCampaigns] = useState([]);
+    const [leads, setLeads] = useState([]);
+    const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [usersData, campaignsData] = await Promise.allSettled([
+                const [usersData, campaignsData, leadsData, customersData] = await Promise.allSettled([
                     getAllUsers(user?.companyId),
-                    getAllCampaigns()
+                    getAllCampaigns(),
+                    getAllLeads(),
+                    getAllCustomers()
                 ]);
 
                 if (usersData.status === 'fulfilled') {
@@ -23,6 +28,12 @@ export default function MarketingDashboard() {
                 }
                 if (campaignsData.status === 'fulfilled') {
                     setCampaigns(campaignsData.value);
+                }
+                if (leadsData.status === 'fulfilled') {
+                    setLeads(leadsData.value);
+                }
+                if (customersData.status === 'fulfilled') {
+                    setCustomers(customersData.value);
                 }
             } catch (error) {
                 console.error("Failed to fetch data", error);
@@ -34,20 +45,56 @@ export default function MarketingDashboard() {
     }, [user?.companyId]);
 
     const activeCampaigns = campaigns.filter(c => c.status === 'ACTIVE');
+    const totalBudget = campaigns.reduce((sum, c) => sum + (parseFloat(c.budget) || 0), 0);
     const totalSent = campaigns.reduce((sum, c) => sum + (c.sentCount || 0), 0);
     const totalOpened = campaigns.reduce((sum, c) => sum + (c.openCount || 0), 0);
     const totalClicks = campaigns.reduce((sum, c) => sum + (c.clickCount || 0), 0);
-    const openRate = totalSent > 0 ? Math.round((totalOpened / totalSent) * 100) : 0;
+    const avgOpenRate = totalSent > 0 ? Math.round((totalOpened / totalSent) * 100) : 0;
+    const avgClickRate = totalOpened > 0 ? Math.round((totalClicks / totalOpened) * 100) : 0;
 
-    const typeIcon = (type) => {
-        switch (type) {
-            case 'EMAIL': return <Mail size={16} />;
-            case 'SOCIAL_MEDIA': return <Share2 size={16} />;
-            case 'WEBINAR': return <Globe size={16} />;
-            case 'SMS': return <Zap size={16} />;
-            default: return <Megaphone size={16} />;
-        }
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
     };
+
+    // Chart Data Preparation
+
+    // 1. Campaign Performance (Top 5 by Sent Count)
+    const campaignPerformanceData = campaigns
+        .sort((a, b) => (b.sentCount || 0) - (a.sentCount || 0))
+        .slice(0, 5)
+        .map(c => ({
+            name: c.name.length > 15 ? c.name.substring(0, 15) + '...' : c.name,
+            sent: c.sentCount || 0,
+            opened: c.openCount || 0,
+            clicked: c.clickCount || 0
+        }));
+
+    // 2. Lead Gen Trend (Last 7 Days)
+    const getLast7Days = () => {
+        const days = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            days.push(d.toISOString().split('T')[0]); // YYYY-MM-DD
+        }
+        return days;
+    };
+
+    const last7Days = getLast7Days();
+    const leadTrendData = last7Days.map(date => {
+        const dayLeads = leads.filter(l => l.createdAt && l.createdAt.startsWith(date));
+        const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
+        return {
+            name: dayName,
+            leads: dayLeads.length,
+            fullDate: date
+        };
+    });
+
+    // Recent Leads (Top 5)
+    const recentLeads = [...leads]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5);
 
     return (
         <div className="space-y-6">
@@ -56,104 +103,123 @@ export default function MarketingDashboard() {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-                            Marketing Hub 📣
+                            Marketing Overview 🚀
                         </h1>
                         <p className="text-gray-500 dark:text-gray-400 mt-1">
-                            Hey {firstName}! {activeCampaigns.length > 0
-                                ? <>You have <span className="font-bold text-purple-600">{activeCampaigns.length} active campaign{activeCampaigns.length > 1 ? 's' : ''}</span> running.</>
-                                : "No active campaigns — launch one to engage your audience!"}
+                            Welcome back, {firstName}! You have {activeCampaigns.length} active campaigns running.
                         </p>
-                    </div>
-                    <div className="hidden md:flex gap-3">
-                        <button className="btn-primary">
-                            <Plus size={16} className="inline mr-2" />New Campaign
-                        </button>
                     </div>
                 </div>
             </div>
 
-            {/* Stats Grid */}
+            {/* High Level Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Total Campaigns" value={campaigns.length} change={activeCampaigns.length > 0 ? `${activeCampaigns.length} active` : "No active"} icon={<Megaphone size={24} />} color="purple" />
-                <StatCard title="Total Sent" value={totalSent.toLocaleString()} change={campaigns.length > 0 ? `Across ${campaigns.length} campaigns` : "No campaigns"} icon={<Mail size={24} />} color="blue" />
-                <StatCard title="Open Rate" value={`${openRate}%`} change={totalSent > 0 ? `${totalOpened.toLocaleString()} opened` : "No data"} icon={<Eye size={24} />} color="green" />
-                <StatCard title="Total Clicks" value={totalClicks.toLocaleString()} change={totalOpened > 0 ? `${Math.round((totalClicks / totalOpened) * 100)}% click rate` : "No data"} icon={<MousePointer size={24} />} color="pink" />
+                <StatCard title="Total Campaigns" value={campaigns.length} change={`${activeCampaigns.length} Active`} icon={<Megaphone size={24} />} color="purple" />
+                <StatCard title="Total Customers" value={customers.length} change="Acquired" icon={<Users size={24} />} color="blue" />
+                <StatCard title="Total Leads" value={leads.length} change="In Pipeline" icon={<UserPlus size={24} />} color="green" />
+                <StatCard title="Avg Open Rate" value={`${avgOpenRate}%`} change="Across all campaigns" icon={<Eye size={24} />} color="pink" />
             </div>
 
-            {/* Campaigns List + Team */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Campaigns */}
+                {/* Campaign Performance Chart */}
                 <div className="lg:col-span-2 glass-card p-6">
-                    <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
-                        Campaigns {campaigns.length > 0 && <span className="text-sm font-normal text-gray-500">({campaigns.length})</span>}
-                    </h3>
-                    {loading ? (
-                        <div className="flex items-center justify-center py-12">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                        </div>
-                    ) : campaigns.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center text-center min-h-[250px]">
-                            <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-full mb-4">
-                                <Megaphone size={32} className="text-purple-500" />
-                            </div>
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">No Campaigns Yet</h3>
-                            <p className="text-gray-500 dark:text-gray-400 max-w-sm text-sm">
-                                Create your first marketing campaign to start reaching your audience.
-                            </p>
+                    <h3 className="text-lg font-bold mb-6 text-gray-900 dark:text-white">Recent Campaign Performance</h3>
+                    {campaigns.length > 0 ? (
+                        <div className="h-[300px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={campaignPerformanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#FFF', borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                                        cursor={{ fill: '#F3F4F6' }}
+                                    />
+                                    <Bar dataKey="sent" name="Sent" fill="#A78BFA" radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="opened" name="Opened" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="clicked" name="Clicked" fill="#7C3AED" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
                         </div>
                     ) : (
-                        <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                            {campaigns.map((campaign) => (
-                                <div key={campaign.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                                        <div className={`p-2 rounded-lg flex-shrink-0 ${campaign.type === 'EMAIL' ? 'bg-blue-100 text-blue-600' :
-                                                campaign.type === 'SOCIAL_MEDIA' ? 'bg-pink-100 text-pink-600' :
-                                                    campaign.type === 'WEBINAR' ? 'bg-green-100 text-green-600' :
-                                                        'bg-purple-100 text-purple-600'
-                                            }`}>
-                                            {typeIcon(campaign.type)}
-                                        </div>
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{campaign.name}</p>
-                                            <p className="text-xs text-gray-500 truncate">{campaign.type?.replace('_', ' ')} · {campaign.sentCount || 0} sent</p>
-                                        </div>
-                                    </div>
-                                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium flex-shrink-0 ml-3 ${campaign.status === 'ACTIVE' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
-                                            campaign.status === 'DRAFT' ? 'bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-300' :
-                                                campaign.status === 'COMPLETED' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
-                                                    campaign.status === 'SCHEDULED' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300' :
-                                                        'bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-300'
-                                        }`}>
-                                        {campaign.status}
-                                    </span>
-                                </div>
-                            ))}
+                        <div className="flex flex-col items-center justify-center h-[300px] text-gray-500">
+                            <Megaphone size={48} className="mb-4 text-gray-300" />
+                            <p>No campaign data available yet.</p>
                         </div>
                     )}
                 </div>
 
-                {/* Marketing Team */}
+                {/* Lead Trend Chart */}
                 <div className="glass-card p-6">
-                    <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Marketing Team</h3>
-                    <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                        {marketingTeam.map((member, i) => (
-                            <div key={member.id || i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                <div className="h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0">
-                                    {member.fullName ? member.fullName.charAt(0).toUpperCase() : member.username.charAt(0).toUpperCase()}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                                        {member.fullName || member.username}
-                                    </p>
-                                    <p className="text-xs text-gray-500 truncate">{member.email}</p>
-                                </div>
-                            </div>
-                        ))}
-                        {marketingTeam.length === 0 && (
-                            <p className="text-sm text-gray-500 text-center py-4">No marketing team members found.</p>
-                        )}
+                    <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Lead Gen Trend</h3>
+                    <div className="h-[300px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={leadTrendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#ec4899" stopOpacity={0.8} />
+                                        <stop offset="95%" stopColor="#ec4899" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#FFF', borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                                    cursor={{ stroke: '#ec4899', strokeWidth: 1 }}
+                                />
+                                <Area type="monotone" dataKey="leads" stroke="#ec4899" fillOpacity={1} fill="url(#colorLeads)" />
+                            </AreaChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
+            </div>
+
+            {/* Recent Leads Section */}
+            <div className="glass-card p-6">
+                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Recent Leads</h3>
+                {recentLeads.length > 0 ? (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="text-xs text-gray-500 border-b border-gray-100 dark:border-gray-800">
+                                    <th className="py-3 font-medium">Name</th>
+                                    <th className="py-3 font-medium">Email</th>
+                                    <th className="py-3 font-medium">Source</th>
+                                    <th className="py-3 font-medium">Status</th>
+                                    <th className="py-3 font-medium">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {recentLeads.map((lead) => (
+                                    <tr key={lead.id} className="text-sm text-gray-700 dark:text-gray-300 border-b border-gray-50 dark:border-gray-800/50 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                        <td className="py-3 font-medium">{lead.name}</td>
+                                        <td className="py-3 text-gray-500">{lead.email}</td>
+                                        <td className="py-3">
+                                            <span className="px-2 py-1 bg-purple-50 text-purple-600 rounded-lg text-xs font-medium">
+                                                {lead.source || 'Unknown'}
+                                            </span>
+                                        </td>
+                                        <td className="py-3">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${lead.status === 'NEW' ? 'bg-blue-50 text-blue-600' :
+                                                    lead.status === 'CONVERTED' ? 'bg-green-50 text-green-600' :
+                                                        'bg-gray-50 text-gray-600'
+                                                }`}>
+                                                {lead.status}
+                                            </span>
+                                        </td>
+                                        <td className="py-3 text-gray-500">
+                                            {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : 'N/A'}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="text-center py-8 text-gray-500">
+                        No recent leads found.
+                    </div>
+                )}
             </div>
         </div>
     );

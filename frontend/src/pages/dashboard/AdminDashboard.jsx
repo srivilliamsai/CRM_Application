@@ -5,7 +5,8 @@ import { ArrowUp, ArrowDown, DollarSign, Users, ShoppingBag, Activity, TrendingU
 
 export default function AdminDashboard() {
     const user = getUser();
-    const firstName = user?.fullName?.split(' ')[0] || 'Admin';
+    const firstName = user?.fullName?.split(' ')[0] || 'User';
+    const role = user?.roles?.[0]?.replace('ROLE_', '') || 'MEMBER';
     const [users, setUsers] = React.useState([]);
     const [stats, setStats] = React.useState({ leads: 0, customers: 0, deals: 0, tickets: 0, campaigns: 0, revenue: 0 });
     const [loading, setLoading] = React.useState(true);
@@ -13,6 +14,9 @@ export default function AdminDashboard() {
     React.useEffect(() => {
         const fetchData = async () => {
             try {
+                // Check if user is logged in
+                if (!user) return;
+
                 const [usersRes, leadsRes, customersRes, dealsRes, ticketsRes, campaignsRes] = await Promise.allSettled([
                     getAllUsers(user?.companyId),
                     getAllLeads(),
@@ -22,28 +26,35 @@ export default function AdminDashboard() {
                     getAllCampaigns()
                 ]);
 
-                if (usersRes.status === 'fulfilled') setUsers(usersRes.value);
+                if (usersRes.status === 'fulfilled' && Array.isArray(usersRes.value)) {
+                    setUsers(usersRes.value);
+                } else {
+                    setUsers([]);
+                }
 
-                const deals = dealsRes.status === 'fulfilled' ? dealsRes.value : [];
+                const deals = (dealsRes.status === 'fulfilled' && Array.isArray(dealsRes.value)) ? dealsRes.value : [];
                 const wonDeals = deals.filter(d => d.stage === 'CLOSED_WON');
                 const revenue = wonDeals.reduce((sum, d) => sum + (parseFloat(d.value) || 0), 0);
 
                 setStats({
-                    leads: leadsRes.status === 'fulfilled' ? leadsRes.value.length : 0,
-                    customers: customersRes.status === 'fulfilled' ? customersRes.value.length : 0,
+                    leads: (leadsRes.status === 'fulfilled' && Array.isArray(leadsRes.value)) ? leadsRes.value.length : 0,
+                    customers: (customersRes.status === 'fulfilled' && Array.isArray(customersRes.value)) ? customersRes.value.length : 0,
                     deals: deals.length,
-                    tickets: ticketsRes.status === 'fulfilled' ? ticketsRes.value.length : 0,
-                    campaigns: campaignsRes.status === 'fulfilled' ? campaignsRes.value.length : 0,
+                    tickets: (ticketsRes.status === 'fulfilled' && Array.isArray(ticketsRes.value)) ? ticketsRes.value.length : 0,
+                    campaigns: (campaignsRes.status === 'fulfilled' && Array.isArray(campaignsRes.value)) ? campaignsRes.value.length : 0,
                     revenue: revenue,
                 });
             } catch (error) {
                 console.error("Failed to fetch data", error);
+                // Set empty state on error to prevent crashes
+                setUsers([]);
+                setStats({ leads: 0, customers: 0, deals: 0, tickets: 0, campaigns: 0, revenue: 0 });
             } finally {
                 setLoading(false);
             }
         };
         fetchData();
-    }, []);
+    }, [user?.companyId]); // Add dependency
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
@@ -73,7 +84,24 @@ export default function AdminDashboard() {
                     </div>
                     <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                         <Shield size={20} className="text-blue-500" />
-                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">System Admin</span>
+                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                            {role.charAt(0) + role.slice(1).toLowerCase()} Team
+                        </span>
+                    </div>
+                </div>
+                {/* Debug: Show Permissions */}
+                <div className="mt-4 pt-4 border-t border-blue-200/50 dark:border-blue-800/50">
+                    <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2 uppercase tracking-wider">Active Permissions</p>
+                    <div className="flex flex-wrap gap-2">
+                        {user?.permissions && user.permissions.length > 0 ? (
+                            user.permissions.map((perm, idx) => (
+                                <span key={idx} className="text-[10px] px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-mono border border-blue-200 dark:border-blue-800">
+                                    {perm}
+                                </span>
+                            ))
+                        ) : (
+                            <span className="text-xs text-gray-500 italic">No specific permissions assigned (or re-login required)</span>
+                        )}
                     </div>
                 </div>
             </div>

@@ -23,18 +23,18 @@ public class FollowupController {
     }
 
     @GetMapping("/deal/{dealId}")
-    public ResponseEntity<List<Followup>> getByDeal(@PathVariable Long dealId) {
-        return ResponseEntity.ok(followupService.getFollowupsByDeal(dealId));
+    public ResponseEntity<List<Followup>> getByDeal(@PathVariable Long dealId, @RequestParam String companyId) {
+        return ResponseEntity.ok(followupService.getFollowupsByDeal(companyId, dealId));
     }
 
     @GetMapping("/pending")
-    public ResponseEntity<List<Followup>> getPending() {
-        return ResponseEntity.ok(followupService.getPendingFollowups());
+    public ResponseEntity<List<Followup>> getPending(@RequestParam String companyId) {
+        return ResponseEntity.ok(followupService.getPendingFollowups(companyId));
     }
 
     @GetMapping("/pending/user/{userId}")
-    public ResponseEntity<List<Followup>> getPendingByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(followupService.getPendingByUser(userId));
+    public ResponseEntity<List<Followup>> getPendingByUser(@PathVariable Long userId, @RequestParam String companyId) {
+        return ResponseEntity.ok(followupService.getPendingByUser(companyId, userId));
     }
 
     @PutMapping("/{id}/complete")

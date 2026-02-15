@@ -1,7 +1,8 @@
 package com.crm.auth.service;
 
-import com.crm.auth.entity.User;
-import com.crm.auth.repository.UserRepository;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,8 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.crm.auth.entity.User;
+import com.crm.auth.repository.UserRepository;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

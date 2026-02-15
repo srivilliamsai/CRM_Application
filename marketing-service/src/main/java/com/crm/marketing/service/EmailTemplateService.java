@@ -14,15 +14,16 @@ public class EmailTemplateService {
     private EmailTemplateRepository templateRepository;
 
     public EmailTemplate createTemplate(EmailTemplate template) {
+        // Enforce companyId from context or object
         return templateRepository.save(template);
     }
 
-    public List<EmailTemplate> getAllActiveTemplates() {
-        return templateRepository.findByActiveTrue();
+    public List<EmailTemplate> getAllActiveTemplates(String companyId) {
+        return templateRepository.findByCompanyIdAndActiveTrue(companyId);
     }
 
-    public List<EmailTemplate> getTemplatesByCategory(String category) {
-        return templateRepository.findByCategory(category);
+    public List<EmailTemplate> getTemplatesByCategory(String companyId, String category) {
+        return templateRepository.findByCompanyIdAndCategory(companyId, category);
     }
 
     public EmailTemplate getTemplateById(Long id) {
@@ -37,6 +38,8 @@ public class EmailTemplateService {
         existing.setBody(template.getBody());
         existing.setCategory(template.getCategory());
         existing.setActive(template.isActive());
+        if (template.getCompanyId() != null)
+            existing.setCompanyId(template.getCompanyId());
         return templateRepository.save(existing);
     }
 

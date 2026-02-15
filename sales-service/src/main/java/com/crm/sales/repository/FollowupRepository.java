@@ -9,9 +9,9 @@ import java.util.List;
 @Repository
 public interface FollowupRepository extends JpaRepository<Followup, Long> {
 
-    List<Followup> findByDealId(Long dealId);
+    List<Followup> findByCompanyIdAndDealId(String companyId, Long dealId);
 
-    List<Followup> findByAssignedToAndCompletedFalse(Long userId);
+    List<Followup> findByCompanyIdAndAssignedToAndCompletedFalse(String companyId, Long userId);
 
-    List<Followup> findByCompletedFalse();
+    List<Followup> findByCompanyIdAndCompletedFalse(String companyId);
 }

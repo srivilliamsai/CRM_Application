@@ -33,6 +33,9 @@ public class Opportunity {
 
     private Long assignedTo;
 
+    @Column(length = 36)
+    private String companyId;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private OpportunityStatus status = OpportunityStatus.OPEN;

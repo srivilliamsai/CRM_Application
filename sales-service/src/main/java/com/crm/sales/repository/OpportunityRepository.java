@@ -9,9 +9,11 @@ import java.util.List;
 @Repository
 public interface OpportunityRepository extends JpaRepository<Opportunity, Long> {
 
-    List<Opportunity> findByStatus(Opportunity.OpportunityStatus status);
+    List<Opportunity> findByCompanyId(String companyId);
 
-    List<Opportunity> findByCustomerId(Long customerId);
+    List<Opportunity> findByCompanyIdAndStatus(String companyId, Opportunity.OpportunityStatus status);
 
-    List<Opportunity> findByProbabilityGreaterThanEqual(Integer probability);
+    List<Opportunity> findByCompanyIdAndCustomerId(String companyId, Long customerId);
+
+    List<Opportunity> findByCompanyIdAndProbabilityGreaterThanEqual(String companyId, Integer probability);
 }

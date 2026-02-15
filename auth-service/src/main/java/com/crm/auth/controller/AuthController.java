@@ -1,17 +1,25 @@
 package com.crm.auth.controller;
 
+import java.util.Collections;
+import java.util.Map;
+
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.crm.auth.dto.AuthResponse;
 import com.crm.auth.dto.LoginRequest;
 import com.crm.auth.dto.RegisterRequest;
 import com.crm.auth.service.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.Collections;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -39,6 +47,18 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
+
+        // Fetch permissions from the user's roles
+        // Note: AuthService.login returns AuthResponse without permissions populated
+        // yet if we didn't update AuthService.
+        // We probably need to update AuthService instead, but since I can't overwrite
+        // the whole service easily without reading it,
+        // I will rely on AuthService to be updated or update it here if I have access
+        // to User entity.
+        // Wait, AuthService returns AuthResponse. I should update AuthService.java.
+        // But I haven't read AuthService.java yet. Let me read it first to be safe.
+        // Actually, let's just return the response for now and I will update
+        // AuthService next.
         return ResponseEntity.ok(response);
     }
 

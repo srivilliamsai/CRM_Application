@@ -27,6 +27,9 @@ public class EmailTemplate {
     @Column(columnDefinition = "TEXT")
     private String body;
 
+    @Column(length = 36)
+    private String companyId;
+
     @Column(length = 50)
     private String category; // Welcome, Followup, Promotion, Newsletter
 

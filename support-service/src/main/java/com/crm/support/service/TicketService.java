@@ -1,15 +1,16 @@
 package com.crm.support.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.crm.support.dto.TicketDTO;
 import com.crm.support.entity.Ticket;
 import com.crm.support.entity.TicketResponse;
 import com.crm.support.repository.TicketRepository;
 import com.crm.support.repository.TicketResponseRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class TicketService {
@@ -23,11 +24,14 @@ public class TicketService {
     public Ticket createTicket(TicketDTO dto) {
         Ticket ticket = new Ticket();
         mapDtoToEntity(dto, ticket);
+        if (dto.getCompanyId() != null) {
+            ticket.setCompanyId(dto.getCompanyId());
+        }
         return ticketRepository.save(ticket);
     }
 
-    public List<Ticket> getAllTickets() {
-        return ticketRepository.findAll();
+    public List<Ticket> getAllTickets(String companyId) {
+        return ticketRepository.findByCompanyId(companyId);
     }
 
     public Ticket getTicketById(Long id) {
@@ -35,21 +39,24 @@ public class TicketService {
                 .orElseThrow(() -> new RuntimeException("Ticket not found with id: " + id));
     }
 
-    public List<Ticket> getTicketsByStatus(String status) {
-        return ticketRepository.findByStatus(Ticket.TicketStatus.valueOf(status.toUpperCase()));
+    public List<Ticket> getTicketsByStatus(String companyId, String status) {
+        return ticketRepository.findByCompanyIdAndStatus(companyId, Ticket.TicketStatus.valueOf(status.toUpperCase()));
     }
 
-    public List<Ticket> getTicketsByCustomer(Long customerId) {
-        return ticketRepository.findByCustomerId(customerId);
+    public List<Ticket> getTicketsByCustomer(String companyId, Long customerId) {
+        return ticketRepository.findByCompanyIdAndCustomerId(companyId, customerId);
     }
 
-    public List<Ticket> getTicketsByAssignee(Long userId) {
-        return ticketRepository.findByAssignedTo(userId);
+    public List<Ticket> getTicketsByAssignee(String companyId, Long userId) {
+        return ticketRepository.findByCompanyIdAndAssignedTo(companyId, userId);
     }
 
     public Ticket updateTicket(Long id, TicketDTO dto) {
         Ticket ticket = getTicketById(id);
         mapDtoToEntity(dto, ticket);
+        if (dto.getCompanyId() != null) {
+			ticket.setCompanyId(dto.getCompanyId());
+		}
         return ticketRepository.save(ticket);
     }
 
@@ -73,6 +80,7 @@ public class TicketService {
         response.setRespondedBy(respondedBy);
         response.setResponderType(responderType);
         response.setTicket(ticket);
+        response.setCompanyId(ticket.getCompanyId());
         return responseRepository.save(response);
     }
 
@@ -91,7 +99,11 @@ public class TicketService {
         ticket.setCategory(dto.getCategory());
         ticket.setCustomerId(dto.getCustomerId());
         ticket.setAssignedTo(dto.getAssignedTo());
-        if (dto.getPriority() != null) ticket.setPriority(Ticket.TicketPriority.valueOf(dto.getPriority().toUpperCase()));
-        if (dto.getStatus() != null) ticket.setStatus(Ticket.TicketStatus.valueOf(dto.getStatus().toUpperCase()));
+        if (dto.getPriority() != null) {
+			ticket.setPriority(Ticket.TicketPriority.valueOf(dto.getPriority().toUpperCase()));
+		}
+        if (dto.getStatus() != null) {
+			ticket.setStatus(Ticket.TicketStatus.valueOf(dto.getStatus().toUpperCase()));
+		}
     }
 }

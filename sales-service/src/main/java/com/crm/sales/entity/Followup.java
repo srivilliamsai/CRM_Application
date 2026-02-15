@@ -33,6 +33,9 @@ public class Followup {
 
     private Long assignedTo;
 
+    @Column(length = 36)
+    private String companyId;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
