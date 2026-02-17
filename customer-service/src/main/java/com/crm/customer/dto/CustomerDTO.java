@@ -10,6 +10,7 @@ public class CustomerDTO {
 
     private Long id;
     private String companyId;
+    private Long assignedTo;
 
     @NotBlank(message = "First name is required")
     private String firstName;

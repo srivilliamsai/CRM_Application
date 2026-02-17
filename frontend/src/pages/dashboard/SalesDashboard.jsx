@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getUser, getAllUsers, getAllDeals, getAllLeads } from '../../services/api';
+import { getUser, getAllUsers, getAllDeals, getAllLeads, getLeadsByAssignee } from '../../services/api';
 import { ArrowUp, ArrowDown, DollarSign, Target, Users, TrendingUp, Phone, Calendar, Briefcase } from 'lucide-react';
 import LeadFunnelChart from '../../components/charts/LeadFunnelChart';
 import DailyTrendChart from '../../components/charts/DailyTrendChart';
@@ -10,15 +10,17 @@ export default function SalesDashboard() {
     const [salesTeam, setSalesTeam] = useState([]);
     const [deals, setDeals] = useState([]);
     const [leads, setLeads] = useState([]);
+    const [myLeads, setMyLeads] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [usersData, dealsData, leadsData] = await Promise.allSettled([
+                const [usersData, dealsData, leadsData, myLeadsData] = await Promise.allSettled([
                     getAllUsers(user?.companyId),
                     getAllDeals(),
-                    getAllLeads()
+                    getAllLeads(),
+                    getLeadsByAssignee(user?.id)
                 ]);
 
                 if (usersData.status === 'fulfilled') {
@@ -31,6 +33,9 @@ export default function SalesDashboard() {
                 if (leadsData.status === 'fulfilled') {
                     setLeads(leadsData.value);
                 }
+                if (myLeadsData.status === 'fulfilled') {
+                    setMyLeads(myLeadsData.value);
+                }
             } catch (error) {
                 console.error("Failed to fetch data", error);
             } finally {
@@ -38,7 +43,7 @@ export default function SalesDashboard() {
             }
         };
         fetchData();
-    }, [user?.companyId]);
+    }, [user?.companyId, user?.id]);
 
     const wonDeals = deals.filter(d => d.stage === 'CLOSED_WON');
     const totalRevenue = wonDeals.reduce((sum, d) => sum + (parseFloat(d.value) || 0), 0);
@@ -109,10 +114,10 @@ export default function SalesDashboard() {
                 <StatCard title="Win Rate" value={`${winRate}%`} change={deals.length > 0 ? `Based on ${deals.length} deals` : "No data"} icon={<ArrowUp size={24} />} color="emerald" />
             </div>
 
-            {/* Charts Section: Funnel & Trends */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Pipeline Funnel */}
-                <div className="glass-card p-6">
+            {/* Charts & Widgets Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Pipeline Funnel - Takes up 2 columns */}
+                <div className="glass-card p-6 lg:col-span-2">
                     <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
                         <Target size={18} /> Lead Funnel
                     </h3>
@@ -127,7 +132,38 @@ export default function SalesDashboard() {
                     </div>
                 </div>
 
-                {/* Daily Lead Trend */}
+                {/* My New Leads - Takes up 1 column */}
+                <div className="glass-card p-6">
+                    <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
+                        <Users size={18} /> My New Leads
+                    </h3>
+                    <div className="space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                        {myLeads.slice(0, 5).map((lead, i) => (
+                            <div key={lead.id || i} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                <div className={`h-10 w-10 rounded-full flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0
+                                    ${i % 3 === 0 ? 'bg-blue-100 text-blue-600' :
+                                        i % 3 === 1 ? 'bg-purple-100 text-purple-600' :
+                                            'bg-emerald-100 text-emerald-600'}`}>
+                                    {lead.name ? lead.name.charAt(0).toUpperCase() : '?'}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{lead.name}</p>
+                                    <p className="text-xs text-gray-500 truncate">{lead.source || 'Direct Traffic'}</p>
+                                </div>
+                                <div className="text-xs font-medium text-gray-400">
+                                    {new Date(lead.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                </div>
+                            </div>
+                        ))}
+                        {myLeads.length === 0 && (
+                            <p className="text-gray-500 text-center py-8">No specific leads assigned to you.</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Daily Trend & Sales Team */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="glass-card p-6">
                     <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
                         <TrendingUp size={18} /> Daily Lead Addition
@@ -142,55 +178,55 @@ export default function SalesDashboard() {
                         )}
                     </div>
                 </div>
-            </div>
 
-            {/* Recent Active Deals */}
-            <div className="glass-card p-6">
-                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Active Deals</h3>
-                {activeDeals.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center text-center min-h-[200px]">
-                        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-full mb-4">
-                            <Briefcase size={32} className="text-purple-500" />
+                {/* Recent Active Deals */}
+                <div className="glass-card p-6">
+                    <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Active Deals</h3>
+                    {activeDeals.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center text-center min-h-[200px]">
+                            <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-full mb-4">
+                                <Briefcase size={32} className="text-purple-500" />
+                            </div>
+                            <p className="text-gray-500 dark:text-gray-400 max-w-sm text-sm">
+                                No active deals yet. Create a new deal to get started.
+                            </p>
                         </div>
-                        <p className="text-gray-500 dark:text-gray-400 max-w-sm text-sm">
-                            No active deals yet. Create a new deal to get started.
-                        </p>
-                    </div>
-                ) : (
-                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                        {activeDeals.slice(0, 8).map((deal) => (
-                            <div key={deal.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{deal.title}</p>
-                                    <p className="text-xs text-gray-500">{deal.stage?.replace('_', ' ')}</p>
+                    ) : (
+                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                            {activeDeals.slice(0, 8).map((deal) => (
+                                <div key={deal.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{deal.title}</p>
+                                        <p className="text-xs text-gray-500">{deal.stage?.replace('_', ' ')}</p>
+                                    </div>
+                                    <span className="text-sm font-bold text-primary ml-3">{formatCurrency(deal.value || 0)}</span>
                                 </div>
-                                <span className="text-sm font-bold text-primary ml-3">{formatCurrency(deal.value || 0)}</span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Sales Team */}
+                <div className="glass-card p-6">
+                    <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Sales Team</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {salesTeam.map((member, i) => (
+                            <div key={member.id || i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                <div className="h-10 w-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0">
+                                    {member.fullName ? member.fullName.charAt(0).toUpperCase() : member.username.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                                        {member.fullName || member.username}
+                                    </p>
+                                    <p className="text-xs text-gray-500 truncate">{member.email}</p>
+                                </div>
                             </div>
                         ))}
+                        {salesTeam.length === 0 && (
+                            <p className="text-sm text-gray-500 text-center py-4 col-span-full">No sales team members found.</p>
+                        )}
                     </div>
-                )}
-            </div>
-
-            {/* Sales Team */}
-            <div className="glass-card p-6">
-                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Sales Team</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {salesTeam.map((member, i) => (
-                        <div key={member.id || i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                            <div className="h-10 w-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0">
-                                {member.fullName ? member.fullName.charAt(0).toUpperCase() : member.username.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                                    {member.fullName || member.username}
-                                </p>
-                                <p className="text-xs text-gray-500 truncate">{member.email}</p>
-                            </div>
-                        </div>
-                    ))}
-                    {salesTeam.length === 0 && (
-                        <p className="text-sm text-gray-500 text-center py-4 col-span-full">No sales team members found.</p>
-                    )}
                 </div>
             </div>
         </div>

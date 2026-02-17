@@ -14,11 +14,22 @@ Enterprise-level Customer Relationship Management system built with **Java 8** a
 | 6 | **Marketing Service** | `8084` | Campaigns, Templates, Segments |
 | 7 | **Support Service** | `8085` | Tickets, Threaded Responses |
 | 8 | **Analytics Service** | `8086` | Dashboard, Reports |
+| 9 | **Notification Service** | `8089` | In-app alerts, Email templates |
+| 10 | **Frontend App** | `5173` | React + Vite UI |
+
+## ✨ Key Features
+- **Microservices Architecture**: Independently deployable services.
+- **Service Discovery**: Automatic registration with Eureka.
+- **API Gateway**: Centralized routing and cross-cutting concerns.
+- **Role-Based Access Control**: Secure endpoints with JWT.
+- **Customer Assignment**: Assign Leads/Customers to Sales Reps with instant notifications.
+- **In-App Notifications**: Real-time alerts for assignments and updates.
+- **Dashboard Analytics**: Visual insights into sales performance.
 
 ## 🛠️ Tech Stack
 
-- **Language**: Java 8
-- **Framework**: Spring Boot 2.7.x
+- **Backend**: Java 8, Spring Boot 2.7.x
+- **Frontend**: React, Vite, TailwindCSS
 - **Database**: MySQL (database-per-service)
 - **Service Discovery**: Netflix Eureka
 - **API Gateway**: Spring Cloud Gateway
@@ -32,6 +43,7 @@ Enterprise-level Customer Relationship Management system built with **Java 8** a
 - Java 8+
 - Maven 3.x
 - MySQL 8.x
+- Node.js 16+ (for Frontend)
 
 ### Start Order
 ```bash
@@ -49,6 +61,12 @@ java -jar sales-service/target/*.jar
 java -jar marketing-service/target/*.jar
 java -jar support-service/target/*.jar
 java -jar analytics-service/target/*.jar
+java -jar notification-service/target/*.jar
+
+# 4. Start Frontend
+cd frontend
+npm install
+npm run dev
 ```
 
 ### Eureka Dashboard
@@ -64,6 +82,7 @@ Visit [http://localhost:8761](http://localhost:8761) to see registered services.
 | Marketing | `/api/campaigns/**`, `/api/campaigns/templates` |
 | Support | `/api/tickets/**`, `/api/tickets/{id}/responses` |
 | Analytics | `/api/analytics/dashboard`, `/api/analytics/reports/**` |
+| Notifications | `/api/notifications/**`, `/api/notifications/mark-read/**` |
 
 ## 📂 Standard Package Structure
 ```

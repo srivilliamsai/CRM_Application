@@ -19,4 +19,5 @@ public class UserDTO {
     private String companyId;
     private List<String> roles;
     private boolean enabled;
+    private java.util.Set<String> permissions;
 }

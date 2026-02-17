@@ -38,6 +38,11 @@ public class Activity {
 
     private Long performedBy; // User ID from auth-service
 
+    @Column(length = 20)
+    private String phoneNumber;
+
+    private Long leadId;
+
     @Column(length = 36)
     private String companyId;
 

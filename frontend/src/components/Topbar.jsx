@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getUser, logout, getUnreadCount, getNotifications, markAsRead, markAllAsRead, sendNotification } from '../services/api';
+import { getUser, logout, getUnreadCount, getNotifications, markAsRead, markAllAsRead, sendNotification, getAllUsers } from '../services/api';
 import { Bell, Search, Menu, User, Settings, LogOut, ChevronDown, Check, Shield } from 'lucide-react';
 import { Menu as HeadlessMenu, Transition, Popover, Dialog } from '@headlessui/react';
 
@@ -17,8 +17,20 @@ export default function TopBar({ toggleSidebar }) {
         if (!requestMessage.trim()) return;
 
         try {
+            // Find Admin ID dynamically
+            const users = await getAllUsers(user.companyId);
+            const admin = users.find(u => u.roles && u.roles.includes('ROLE_ADMIN'));
+
+            if (!admin) {
+                console.error("No admin found to send request to.");
+                alert("Failed to find an admin to send the request to.");
+                return;
+            }
+
+            console.log("Sending request to Admin:", admin.username, "(ID:", admin.id, ")");
+
             await sendNotification({
-                recipientUserId: 1, // Admin ID as per instruction
+                recipientUserId: admin.id,
                 type: 'IN_APP',
                 title: `Access Request from ${user.username}`,
                 message: requestMessage,
@@ -40,8 +52,8 @@ export default function TopBar({ toggleSidebar }) {
     React.useEffect(() => {
         if (user?.id) {
             fetchNotifications();
-            // Poll for notifications every 30 seconds
-            const interval = setInterval(fetchNotifications, 30000);
+            // Poll for notifications every 5 seconds
+            const interval = setInterval(fetchNotifications, 5000);
             return () => clearInterval(interval);
         }
     }, [user?.id]);
@@ -67,6 +79,22 @@ export default function TopBar({ toggleSidebar }) {
     const handleMarkAllRead = async () => {
         await markAllAsRead(user.id);
         fetchNotifications();
+    };
+
+    const handleNotificationClick = async (notif) => {
+        // 1. Mark as read
+        if (!notif.readAt) {
+            await handleMarkRead(notif.id);
+        }
+
+        // 2. Navigate based on reference
+        if (notif.referenceType === 'LEAD' && notif.referenceId) {
+            navigate(`/dashboard/leads?viewId=${notif.referenceId}`);
+        } else if (notif.referenceType === 'CUSTOMER' && notif.referenceId) {
+            navigate(`/dashboard/customers?viewId=${notif.referenceId}`);
+        }
+
+        // Close popover (React headless ui closes on click usually, but if not we might need ref)
     };
 
     const getBreadcrumbs = () => {
@@ -137,13 +165,15 @@ export default function TopBar({ toggleSidebar }) {
                                     <div className="p-4 text-center text-gray-500 text-sm">No new notifications</div>
                                 ) : (
                                     notifications.map(notif => (
-                                        <div key={notif.id} className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-800 last:border-0 ${notif.readAt ? 'opacity-60' : ''}`}>
+                                        <div
+                                            key={notif.id}
+                                            onClick={() => handleNotificationClick(notif)}
+                                            className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-100 dark:border-gray-800 last:border-0 cursor-pointer ${notif.readAt ? 'opacity-60' : ''}`}
+                                        >
                                             <div className="flex justify-between items-start mb-1">
                                                 <span className="font-medium text-sm text-gray-900 dark:text-white">{notif.title}</span>
                                                 {!notif.readAt && (
-                                                    <button onClick={() => handleMarkRead(notif.id)} className="text-gray-400 hover:text-primary">
-                                                        <Check size={14} />
-                                                    </button>
+                                                    <span className="h-2 w-2 bg-blue-500 rounded-full"></span>
                                                 )}
                                             </div>
                                             <p className="text-xs text-gray-500 line-clamp-2">{notif.message}</p>
@@ -155,7 +185,10 @@ export default function TopBar({ toggleSidebar }) {
                                 )}
                             </div>
                             <div className="p-2 border-t border-gray-100 dark:border-gray-800">
-                                <button className="w-full py-2 text-xs text-center text-primary font-medium hover:bg-primary/5 rounded-lg transition-colors">
+                                <button
+                                    onClick={() => { navigate('/dashboard/notifications'); }}
+                                    className="w-full py-2 text-xs text-center text-primary font-medium hover:bg-primary/5 rounded-lg transition-colors"
+                                >
                                     View All Notifications
                                 </button>
                             </div>

@@ -43,7 +43,7 @@ public class NotificationService {
     }
 
     public List<Notification> getUserNotifications(Long userId) {
-        return notificationRepository.findByRecipientUserIdAndStatus(userId, Notification.NotificationStatus.SENT);
+        return notificationRepository.findByRecipientUserIdOrderByCreatedAtDesc(userId);
     }
 
     // Note: The controller expects getUserNotifications to return generally all or

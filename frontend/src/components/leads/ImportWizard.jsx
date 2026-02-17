@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import Papa from 'papaparse';
 import { Upload, ArrowRight, Check, X, FileText, AlertCircle } from 'lucide-react';
-import { createLead } from '../../services/api';
+import { createLead, getUser } from '../../services/api';
 
 export default function ImportWizard({ onClose, onComplete }) {
     const [step, setStep] = useState(1);
@@ -69,6 +69,9 @@ export default function ImportWizard({ onClose, onComplete }) {
         let failCount = 0;
         const errorLog = [];
 
+        // Get current user for assignment
+        const user = getUser();
+
         for (const row of csvData) {
             try {
                 const leadData = {
@@ -78,7 +81,8 @@ export default function ImportWizard({ onClose, onComplete }) {
                     company: mapping.company ? row[mapping.company] : '',
                     source: mapping.source ? row[mapping.source] : 'IMPORT',
                     status: mapping.status ? row[mapping.status] : 'NEW',
-                    score: 0
+                    score: 0,
+                    assignedTo: importOptions.assignTo === 'CURRENT_USER' ? user?.id : null
                 };
 
                 // Basic validation

@@ -59,22 +59,7 @@ export default function AnalyticsDashboard() {
         }
     };
 
-    // Mock data for visualization if backend returns empty/simple structure
-    const mockSalesData = [
-        { name: 'Jan', sales: 4000, leads: 2400 },
-        { name: 'Feb', sales: 3000, leads: 1398 },
-        { name: 'Mar', sales: 2000, leads: 9800 },
-        { name: 'Apr', sales: 2780, leads: 3908 },
-        { name: 'May', sales: 1890, leads: 4800 },
-        { name: 'Jun', sales: 2390, leads: 3800 },
-    ];
 
-    const mockPieData = [
-        { name: 'Closed Won', value: 400 },
-        { name: 'Prospecting', value: 300 },
-        { name: 'Negotiation', value: 300 },
-        { name: 'On Hold', value: 200 },
-    ];
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -108,7 +93,7 @@ export default function AnalyticsDashboard() {
                         </span>
                     </div>
                     <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                        {metrics?.totalRevenue ? `$${metrics.totalRevenue}` : '$124,500'}
+                        {metrics?.totalRevenue !== undefined ? `$${metrics.totalRevenue}` : '$0'}
                     </div>
                     <div className="text-sm text-gray-500">Total Revenue</div>
                 </div>
@@ -123,7 +108,7 @@ export default function AnalyticsDashboard() {
                         </span>
                     </div>
                     <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                        {metrics?.activeUsers || '1,234'}
+                        {metrics?.activeUsers !== undefined ? metrics.activeUsers : '0'}
                     </div>
                     <div className="text-sm text-gray-500">Active Leads</div>
                 </div>
@@ -134,13 +119,13 @@ export default function AnalyticsDashboard() {
                             <Activity size={24} />
                         </div>
                         <span className="text-sm font-medium text-gray-500">
-                            This Month
+                            Total
                         </span>
                     </div>
                     <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                        {metrics?.dealsClosed || '45'}
+                        {metrics?.totalActivities || '0'}
                     </div>
-                    <div className="text-sm text-gray-500">Deals Closed</div>
+                    <div className="text-sm text-gray-500">Activities Logged</div>
                 </div>
 
                 <div className="bg-white dark:bg-card p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
@@ -165,7 +150,7 @@ export default function AnalyticsDashboard() {
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Revenue & Leads Trend</h3>
                     <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={mockSalesData}>
+                            <LineChart data={metrics?.salesTrend || []}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                                 <XAxis dataKey="name" stroke="#9CA3AF" tick={{ fill: '#9CA3AF' }} tickLine={false} axisLine={false} />
                                 <YAxis stroke="#9CA3AF" tick={{ fill: '#9CA3AF' }} tickLine={false} axisLine={false} />
@@ -173,8 +158,8 @@ export default function AnalyticsDashboard() {
                                     contentStyle={{ borderRadius: '10px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                 />
                                 <Legend />
-                                <Line type="monotone" dataKey="sales" stroke="#3B82F6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
-                                <Line type="monotone" dataKey="leads" stroke="#10B981" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                                <Line type="monotone" dataKey="sales" name="Revenue ($)" stroke="#3B82F6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                                <Line type="monotone" dataKey="leads" name="New Leads" stroke="#10B981" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
@@ -183,27 +168,74 @@ export default function AnalyticsDashboard() {
                 <div className="bg-white dark:bg-card p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Deal Distribution</h3>
                     <div className="h-[300px] w-full flex items-center justify-center">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={mockPieData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={80}
-                                    outerRadius={110}
-                                    fill="#8884d8"
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                >
-                                    {mockPieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                                <Legend verticalAlign="bottom" height={36} />
-                            </PieChart>
-                        </ResponsiveContainer>
+                        {metrics?.dealDistribution && metrics.dealDistribution.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={metrics.dealDistribution}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={80}
+                                        outerRadius={110}
+                                        fill="#8884d8"
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {metrics.dealDistribution.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                    <Legend verticalAlign="bottom" height={36} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="flex flex-col items-center text-gray-400">
+                                <DollarSign size={48} className="mb-2 opacity-50" />
+                                <p>No deals found yet.</p>
+                            </div>
+                        )}
                     </div>
+                </div>
+            </div>
+
+            {/* Recent Activities Feed */}
+            <div className="bg-white dark:bg-card rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+                <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Recent Activities</h3>
+                </div>
+                <div className="p-6">
+                    {metrics?.recentActivities?.length > 0 ? (
+                        <div className="space-y-6">
+                            {metrics.recentActivities.map((activity) => (
+                                <div key={activity.id} className="flex gap-4">
+                                    <div className="flex-shrink-0 mt-1">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activity.type === 'CALL' ? 'bg-blue-100 text-blue-600' :
+                                            activity.type === 'EMAIL' ? 'bg-green-100 text-green-600' :
+                                                'bg-purple-100 text-purple-600'
+                                            }`}>
+                                            <Activity size={16} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                            {activity.description}
+                                        </p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-xs text-gray-500">
+                                                {new Date(activity.createdAt).toLocaleString()}
+                                            </span>
+                                            <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+                                                {activity.type}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-gray-500 text-center py-4">No recent activities found.</p>
+                    )}
                 </div>
             </div>
 

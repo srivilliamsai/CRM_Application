@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Users, Plus, Search, Filter, Mail, Phone, Shield, MoreVertical, X, Check } from 'lucide-react';
-import { register, getAllUsers, getUser } from '../../services/api';
+import { register, getAllUsers, getUser, updateUserRole, grantPermission, revokePermission } from '../../services/api';
 
 export default function TeamPage() {
     const [team, setTeam] = useState([]);
@@ -8,6 +8,9 @@ export default function TeamPage() {
     const [newUser, setNewUser] = useState({ fullName: '', email: '', password: '', role: 'ROLE_SALES', phone: '' });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState(null);
+    const [editingUser, setEditingUser] = useState(null);
+    const [newRole, setNewRole] = useState('');
+    const [canDeleteCustomer, setCanDeleteCustomer] = useState(false);
     const currentUser = getUser();
 
     useEffect(() => {
@@ -52,6 +55,68 @@ export default function TeamPage() {
             }, 1500);
         } catch (err) {
             setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to add user.' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdateRole = async () => {
+        if (!editingUser || !newRole) return;
+        setLoading(true);
+        try {
+            await updateUserRole(editingUser.id, newRole);
+            setMessage({ type: 'success', text: 'Role updated successfully!' });
+            fetchUsers();
+            setEditingUser(null);
+            setTimeout(() => setMessage(null), 1500);
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Failed to update role.' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const openEditModal = (user) => {
+        setEditingUser(user);
+        setNewRole(user.roles && user.roles.length > 0 ? user.roles[0] : 'ROLE_USER');
+        // Check if user has DELETE_CUSTOMERS permission (either via role or direct)
+        // Note: getAllUsers logic in AuthController needs to return permissions for this to work perfectly on first load.
+        // Assuming current logic returns user data with permissions.
+        // But the DTO in AuthController might not have permissions populated fully in getAllUsers response yet?
+        // Let's assume user.permissions exists.
+        const hasDelete = user.permissions && user.permissions.includes('DELETE_CUSTOMERS');
+        setCanDeleteCustomer(hasDelete);
+    };
+
+    const handleSavePermissions = async () => {
+        if (!editingUser) return;
+        setLoading(true);
+        try {
+            // Update Role
+            if (newRole !== (editingUser.roles && editingUser.roles[0])) {
+                await updateUserRole(editingUser.id, newRole);
+            }
+
+            // Update Special Permissions
+            if (canDeleteCustomer) {
+                // Grant if not already present
+                if (!editingUser.permissions || !editingUser.permissions.includes('DELETE_CUSTOMERS')) {
+                    await grantPermission(editingUser.id, 'DELETE_CUSTOMERS');
+                }
+            } else {
+                // Revoke if present
+                if (editingUser.permissions && editingUser.permissions.includes('DELETE_CUSTOMERS')) {
+                    await revokePermission(editingUser.id, 'DELETE_CUSTOMERS');
+                }
+            }
+
+            setMessage({ type: 'success', text: 'User updated successfully!' });
+            fetchUsers();
+            setEditingUser(null);
+            setTimeout(() => setMessage(null), 1500);
+        } catch (err) {
+            console.error(err);
+            setMessage({ type: 'error', text: 'Failed to update user.' });
         } finally {
             setLoading(false);
         }
@@ -113,8 +178,12 @@ export default function TeamPage() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
-                                            <MoreVertical size={16} />
+                                        <button
+                                            onClick={() => openEditModal(member)}
+                                            className="p-2 text-gray-400 hover:text-primary dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                            title="Edit Role"
+                                        >
+                                            <Shield size={16} />
                                         </button>
                                     </td>
                                 </tr>
@@ -213,6 +282,71 @@ export default function TeamPage() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {/* Edit Role Modal */}
+            {editingUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-card w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden scale-in">
+                        <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Edit Role</h3>
+                            <button onClick={() => setEditingUser(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            <p className="text-sm text-gray-500">Update role for <strong>{editingUser.fullName || editingUser.username}</strong></p>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Select Role</label>
+                                <select
+                                    className="input-field"
+                                    value={newRole}
+                                    onChange={(e) => setNewRole(e.target.value)}
+                                >
+                                    <option value="ROLE_SALES">Sales</option>
+                                    <option value="ROLE_MARKETING">Marketing</option>
+                                    <option value="ROLE_SUPPORT">Support</option>
+                                    <option value="ROLE_ADMIN">Admin</option>
+                                </select>
+                            </div>
+
+                            {/* Special Permissions Section */}
+                            <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
+                                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Special Access</label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id="deleteAccess"
+                                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                                        checked={canDeleteCustomer}
+                                        onChange={(e) => setCanDeleteCustomer(e.target.checked)}
+                                    />
+                                    <label htmlFor="deleteAccess" className="text-sm text-gray-600 dark:text-gray-400">
+                                        Allow Deleting Customers
+                                        <span className="block text-xs text-gray-400">Grant specific delete access without Admin role.</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div className="pt-4 flex gap-3">
+                                <button
+                                    onClick={() => setEditingUser(null)}
+                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSavePermissions}
+                                    disabled={loading}
+                                    className="flex-1 btn-primary"
+                                >
+                                    {loading ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

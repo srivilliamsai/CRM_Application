@@ -75,6 +75,22 @@ export const getAllUsers = async (companyId) => {
     return response.data;
 };
 
+export const updateUserRole = async (userId, role) => {
+    const response = await AUTH_API.put(`/users/${userId}/role`, { role });
+    return response.data;
+};
+
+export const grantPermission = async (userId, permission) => {
+    const response = await AUTH_API.put(`/users/${userId}/permissions`, { permission });
+    return response.data;
+};
+
+export const revokePermission = async (userId, permission) => {
+    // Delete requests with body need 'data' key in axios
+    const response = await AUTH_API.delete(`/users/${userId}/permissions`, { data: { permission } });
+    return response.data;
+};
+
 export const saveAuth = (authResponse) => {
     sessionStorage.setItem('token', authResponse.token);
     sessionStorage.setItem('user', JSON.stringify({
@@ -101,6 +117,21 @@ export const getUser = () => {
     return user ? JSON.parse(user) : null;
 };
 
+export const refreshUserProfile = async () => {
+    try {
+        const response = await AUTH_API.get('/me');
+        const user = response.data;
+        const currentToken = sessionStorage.getItem('token');
+
+        // Update session storage with new user data but keep the token
+        saveAuth({ ...user, token: currentToken });
+        return user;
+    } catch (error) {
+        console.error("Failed to refresh user profile", error);
+        return null;
+    }
+};
+
 export const getCompanyId = () => {
     const user = getUser();
     return user?.companyId;
@@ -119,6 +150,18 @@ export const resetPassword = async (token, newPassword) => {
 };
 
 // ============ Leads (customer-service) ============
+
+export const getLeadsByAssignee = async (userId) => {
+    const companyId = getCompanyId();
+    const response = await CUSTOMER_API.get(`/leads/assigned/${userId}?companyId=${companyId}`);
+    return response.data;
+};
+
+export const getHighScoreLeads = async () => {
+    const companyId = getCompanyId();
+    const response = await CUSTOMER_API.get(`/leads?companyId=${companyId}`);
+    return response.data;
+};
 
 export const getAllLeads = async () => {
     const companyId = getCompanyId();
@@ -376,7 +419,8 @@ export const addTicketResponse = async (id, data) => {
 // ============ Analytics (analytics-service) ============
 
 export const getDashboardAnalytics = async () => {
-    const response = await ANALYTICS_API.get('/analytics/dashboard');
+    const companyId = getCompanyId();
+    const response = await ANALYTICS_API.get(`/analytics/dashboard?companyId=${companyId}`);
     return response.data;
 };
 

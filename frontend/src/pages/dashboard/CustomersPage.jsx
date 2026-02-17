@@ -1,17 +1,42 @@
 import { useState, useEffect } from 'react';
-import { getAllCustomers, createCustomer, updateCustomer, deleteCustomer, getDealsByCustomer, createDeal, getTicketsByCustomer, getNotesByCustomer, createNote, deleteNote, getActivitiesByCustomer } from '../../services/api';
+import { getAllCustomers, createCustomer, updateCustomer, deleteCustomer, getDealsByCustomer, createDeal, getTicketsByCustomer, getNotesByCustomer, createNote, deleteNote, getActivitiesByCustomer, getUser, getAllUsers } from '../../services/api';
 import { Search, Filter, MoreHorizontal, Building, MapPin, Plus, Users, Mail, X, Phone, Edit, Trash2, Eye, DollarSign, Calendar, Briefcase, ArrowRight, Headphones, AlertCircle, CheckCircle, Clock, StickyNote, Send, Activity, Trash } from 'lucide-react';
 
 export default function CustomersPage() {
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', company: '', jobTitle: '', address: '', city: '', state: '', country: '', status: 'ACTIVE', source: '' });
+    const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', company: '', jobTitle: '', address: '', city: '', state: '', country: '', status: 'ACTIVE', source: '', assignedTo: '' });
     const [isEditing, setIsEditing] = useState(false);
     const [selectedCustomerId, setSelectedCustomerId] = useState(null);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const [salesReps, setSalesReps] = useState([]);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            if (user && (user.roles.includes('ROLE_ADMIN') || user.roles.includes('ROLE_MARKETING') || user.roles.includes('ROLE_SALES'))) {
+                try {
+                    const allUsers = await getAllUsers(user.companyId);
+                    const reps = allUsers.filter(u => u.roles && u.roles.includes('ROLE_SALES'));
+                    setSalesReps(reps);
+                } catch (err) {
+                    console.error("Failed to fetch users", err);
+                }
+            }
+        };
+        fetchUsers();
+    }, []);
+
+    // Permission Check
+    const user = getUser();
+    console.log("Current User:", user);
+    console.log("Permissions:", user?.permissions);
+
+    // Check if user has explicit permission OR is Admin
+    const canEdit = user?.permissions?.includes('WRITE_CUSTOMERS') || user?.roles?.includes('ROLE_ADMIN');
+    const canDelete = user?.permissions?.includes('DELETE_CUSTOMERS') || user?.roles?.includes('ROLE_ADMIN');
 
 
     const [viewCustomer, setViewCustomer] = useState(null);
@@ -128,7 +153,9 @@ export default function CustomersPage() {
             state: customer.state || '',
             country: customer.country || '',
             status: customer.status || 'ACTIVE',
-            source: customer.source || ''
+            status: customer.status || 'ACTIVE',
+            source: customer.source || '',
+            assignedTo: customer.assignedTo || ''
         });
         setIsEditing(true);
         setSelectedCustomerId(customer.id);
@@ -164,13 +191,27 @@ export default function CustomersPage() {
         fetchCustomers();
     }, []);
 
+    // Deep Linking Handler
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const viewId = params.get('viewId');
+        if (viewId && customers.length > 0) {
+            const customerToView = customers.find(c => c.id === parseInt(viewId));
+            if (customerToView) {
+                openViewModal(customerToView);
+                // Clean up URL without reload
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+        }
+    }, [customers, location.search]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
     };
 
     const openCreateModal = () => {
-        setForm({ firstName: '', lastName: '', email: '', phone: '', company: '', jobTitle: '', address: '', city: '', state: '', country: '', status: 'ACTIVE', source: '' });
+        setForm({ firstName: '', lastName: '', email: '', phone: '', company: '', jobTitle: '', address: '', city: '', state: '', country: '', status: 'ACTIVE', source: '', assignedTo: '' });
         setIsEditing(false);
         setSelectedCustomerId(null);
         setError('');
@@ -183,9 +224,9 @@ export default function CustomersPage() {
         setError('');
         try {
             if (isEditing) {
-                await updateCustomer(selectedCustomerId, form);
+                await updateCustomer(selectedCustomerId, { ...form, assignedTo: form.assignedTo || user.id });
             } else {
-                await createCustomer(form);
+                await createCustomer({ ...form, assignedTo: form.assignedTo || user.id });
             }
             setShowModal(false);
             fetchCustomers();
@@ -247,12 +288,16 @@ export default function CustomersPage() {
                                             <button onClick={() => openViewModal(customer)} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2">
                                                 <Eye size={16} /> View Details
                                             </button>
-                                            <button onClick={() => openEditModal(customer)} className="w-full text-left px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10 flex items-center gap-2">
-                                                <Edit size={16} /> Edit Customer
-                                            </button>
-                                            <button onClick={() => handleDelete(customer.id)} className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-2">
-                                                <Trash2 size={16} /> Delete
-                                            </button>
+                                            {canEdit && (
+                                                <button onClick={() => openEditModal(customer)} className="w-full text-left px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10 flex items-center gap-2">
+                                                    <Edit size={16} /> Edit Customer
+                                                </button>
+                                            )}
+                                            {canDelete && (
+                                                <button onClick={() => handleDelete(customer.id)} className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center gap-2">
+                                                    <Trash2 size={16} /> Delete
+                                                </button>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -400,6 +445,84 @@ export default function CustomersPage() {
                                         <option value="OTHER">Other</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            {/* Assignment Section (Copied from Leads) */}
+                            <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-gray-100 dark:border-gray-800 mt-4">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Customer Assignment</label>
+
+                                {(user.roles.includes('ROLE_ADMIN') || user.roles.includes('ROLE_MARKETING')) ? (
+                                    // Admin/Marketing View: Simple Dropdown
+                                    <div>
+                                        <select
+                                            name="assignedTo"
+                                            value={form.assignedTo || ''}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary outline-none transition-all text-gray-900 dark:text-white"
+                                        >
+                                            <option value={user.id}>Assign to Me ({user.fullName})</option>
+                                            {salesReps.filter(rep => rep.id !== user.id).map(rep => (
+                                                <option key={rep.id} value={rep.id}>{rep.fullName} (Sales)</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                ) : (
+                                    // Sales View: "Assign to Me" vs "Another"
+                                    <div className="space-y-3">
+                                        <div className="flex flex-col gap-2">
+                                            <div className="flex items-center gap-4">
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name="assignmentType"
+                                                        checked={!form.assignedTo || form.assignedTo === user.id}
+                                                        onChange={() => setForm(prev => ({ ...prev, assignedTo: user.id }))}
+                                                        className="text-primary focus:ring-primary"
+                                                    />
+                                                    <span className="text-sm text-gray-700 dark:text-gray-300">Assign to Me</span>
+                                                </label>
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name="assignmentType"
+                                                        checked={form.assignedTo && form.assignedTo !== user.id}
+                                                        onChange={() => setForm(prev => ({ ...prev, assignedTo: salesReps.length > 0 ? salesReps[0].id : '' }))}
+                                                        className="text-primary focus:ring-primary"
+                                                    />
+                                                    <span className="text-sm text-gray-700 dark:text-gray-300">Assign to Another</span>
+                                                </label>
+                                            </div>
+                                            {/* Feedback for 'Assign to Me' */}
+                                            {(!form.assignedTo || form.assignedTo === user.id) && isEditing && customers.find(c => c.id === selectedCustomerId)?.assignedTo === user.id && (
+                                                <div className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                                                    ✓ Already assigned to you
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {form.assignedTo && form.assignedTo !== user.id && (
+                                            <div>
+                                                <select
+                                                    name="assignedTo"
+                                                    value={form.assignedTo || ''}
+                                                    onChange={handleChange}
+                                                    className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary outline-none transition-all text-gray-900 dark:text-white"
+                                                >
+                                                    <option value="">Select Sales Rep</option>
+                                                    {salesReps.filter(rep => rep.id !== user.id).map(rep => (
+                                                        <option key={rep.id} value={rep.id}>{rep.fullName}</option>
+                                                    ))}
+                                                </select>
+                                                {/* Feedback for 'Assign to Another' */}
+                                                {isEditing && form.assignedTo === customers.find(c => c.id === selectedCustomerId)?.assignedTo && (
+                                                    <div className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">
+                                                        ✓ Already assigned to this user
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">

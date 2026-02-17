@@ -1,15 +1,23 @@
 package com.crm.analytics.controller;
 
-import com.crm.analytics.entity.Report;
-import com.crm.analytics.repository.ReportRepository;
-import com.crm.analytics.service.DashboardService;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
+import com.crm.analytics.entity.Report;
+import com.crm.analytics.repository.ReportRepository;
+import com.crm.analytics.service.DashboardService;
 
 @RestController
 @RequestMapping("/api/analytics")
@@ -27,8 +35,9 @@ public class AnalyticsController {
      * Returns aggregated metrics from all services.
      */
     @GetMapping("/dashboard")
-    public ResponseEntity<Map<String, Object>> getDashboard() {
-        return ResponseEntity.ok(dashboardService.getDashboard());
+    public ResponseEntity<Map<String, Object>> getDashboard(
+            @org.springframework.web.bind.annotation.RequestParam("companyId") String companyId) {
+        return ResponseEntity.ok(dashboardService.getDashboard(companyId));
     }
 
     /**

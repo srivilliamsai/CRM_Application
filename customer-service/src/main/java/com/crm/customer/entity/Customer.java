@@ -68,6 +68,8 @@ public class Customer {
     @Column(length = 36)
     private String companyId; // Company isolation
 
+    private Long assignedTo; // User ID
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 

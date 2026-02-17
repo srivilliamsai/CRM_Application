@@ -80,4 +80,46 @@ public class AuthController {
             @PathVariable String companyId) {
         return ResponseEntity.ok(authService.getUsersByCompanyId(companyId));
     }
+
+    /**
+     * PUT /api/auth/users/{id}/role
+     * Update user role
+     */
+    @org.springframework.web.bind.annotation.PutMapping("/users/{id}/role")
+    public ResponseEntity<String> updateUserRole(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        String roleName = request.get("role");
+        authService.updateUserRole(id, roleName);
+        return ResponseEntity.ok("User role updated successfully!");
+    }
+
+    /**
+     * PUT /api/auth/users/{id}/permissions
+     * Grant a specific permission to user
+     */
+    @org.springframework.web.bind.annotation.PutMapping("/users/{id}/permissions")
+    public ResponseEntity<String> grantPermission(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        String permissionName = request.get("permission");
+        authService.grantPermission(id, permissionName);
+        return ResponseEntity.ok("Permission granted successfully!");
+    }
+
+    /**
+     * DELETE /api/auth/users/{id}/permissions
+     * Revoke a specific permission from user
+     */
+    @org.springframework.web.bind.annotation.DeleteMapping("/users/{id}/permissions")
+    public ResponseEntity<String> revokePermission(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        String permissionName = request.get("permission");
+        authService.revokePermission(id, permissionName);
+        return ResponseEntity.ok("Permission revoked successfully!");
+    }
+
+    /**
+     * GET /api/auth/me
+     * Get current user profile
+     */
+    @GetMapping("/me")
+    public ResponseEntity<com.crm.auth.dto.UserDTO> getCurrentUser(java.security.Principal principal) {
+        return ResponseEntity.ok(authService.getCurrentUser(principal.getName()));
+    }
 }

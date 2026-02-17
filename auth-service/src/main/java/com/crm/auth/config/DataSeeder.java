@@ -48,33 +48,48 @@ public class DataSeeder implements CommandLineRunner {
 
         // Seed Roles and Assign Permissions
         for (Role.RoleName roleName : Role.RoleName.values()) {
-            if (!roleRepository.findByName(roleName).isPresent()) {
-                Role role = new Role();
+            Role role = roleRepository.findByName(roleName).orElse(new Role());
+
+            // If new role, set name
+            if (role.getName() == null) {
                 role.setName(roleName);
-
-                java.util.Set<com.crm.auth.entity.Permission> rolePermissions = new java.util.HashSet<>();
-                // Assign permissions based on role
-                if (roleName == Role.RoleName.ROLE_ADMIN) {
-                    rolePermissions.addAll(permissionRepository.findAll());
-                } else if (roleName == Role.RoleName.ROLE_SALES) {
-                    addPermission(rolePermissions, "READ_CUSTOMERS");
-                    addPermission(rolePermissions, "WRITE_CUSTOMERS");
-                    addPermission(rolePermissions, "READ_DEALS");
-                    addPermission(rolePermissions, "WRITE_DEALS");
-                } else if (roleName == Role.RoleName.ROLE_SUPPORT) {
-                    addPermission(rolePermissions, "READ_CUSTOMERS");
-                    addPermission(rolePermissions, "READ_TICKETS");
-                    addPermission(rolePermissions, "WRITE_TICKETS");
-                } else if (roleName == Role.RoleName.ROLE_MARKETING) {
-                    addPermission(rolePermissions, "READ_CUSTOMERS");
-                    addPermission(rolePermissions, "READ_CAMPAIGNS");
-                    addPermission(rolePermissions, "WRITE_CAMPAIGNS");
-                }
-
-                role.setPermissions(rolePermissions);
-                roleRepository.save(role);
-                System.out.println("Seeded role: " + roleName);
             }
+
+            // Always ensure permissions are set (Factory Defaults)
+            java.util.Set<com.crm.auth.entity.Permission> rolePermissions = role.getPermissions();
+            if (rolePermissions == null) {
+                rolePermissions = new java.util.HashSet<>();
+            }
+
+            // Assign permissions based on role
+            if (roleName == Role.RoleName.ROLE_ADMIN) {
+                // Admin gets EVERYTHING
+                rolePermissions.addAll(permissionRepository.findAll());
+            } else if (roleName == Role.RoleName.ROLE_SALES) {
+                // Sales: Can Read AND Edit Customers, but NOT Delete
+                addPermission(rolePermissions, "READ_CUSTOMERS");
+                addPermission(rolePermissions, "WRITE_CUSTOMERS"); // Added back
+                addPermission(rolePermissions, "READ_DEALS");
+                addPermission(rolePermissions, "WRITE_DEALS");
+            } else if (roleName == Role.RoleName.ROLE_SUPPORT) {
+                // Support: Can Read AND Edit Customers
+                addPermission(rolePermissions, "READ_CUSTOMERS");
+                addPermission(rolePermissions, "WRITE_CUSTOMERS"); // Added back
+                addPermission(rolePermissions, "READ_TICKETS");
+                addPermission(rolePermissions, "WRITE_TICKETS");
+            } else if (roleName == Role.RoleName.ROLE_MARKETING) {
+                // Marketing: Can Read AND Edit Customers
+                addPermission(rolePermissions, "READ_CUSTOMERS");
+                addPermission(rolePermissions, "WRITE_CUSTOMERS"); // Added back
+                addPermission(rolePermissions, "READ_CAMPAIGNS");
+                addPermission(rolePermissions, "WRITE_CAMPAIGNS");
+            }
+
+            // Only update if permissions were empty or changed (logic simplified to always
+            // save for repair)
+            role.setPermissions(rolePermissions);
+            roleRepository.save(role);
+            System.out.println("Seeded/Updated role: " + roleName);
         }
 
         // Seed Default Admin

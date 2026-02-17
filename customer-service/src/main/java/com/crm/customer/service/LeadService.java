@@ -20,6 +20,9 @@ public class LeadService {
     @Autowired
     private LeadHistoryRepository leadHistoryRepository;
 
+    @Autowired
+    private com.crm.customer.client.NotificationClient notificationClient;
+
     // ========== CREATE ==========
 
     public Lead createLead(LeadDTO dto) {
@@ -29,6 +32,13 @@ public class LeadService {
         Lead savedLead = leadRepository.save(lead);
         saveHistory(savedLead.getId(), "CREATED", null, "Lead Created with Status: " + savedLead.getStatus(),
                 dto.getCompanyId());
+
+        // Notify if assigned
+        if (savedLead.getAssignedTo() != null) {
+            sendAssignmentNotification(savedLead.getAssignedTo(), "Lead", savedLead.getId(), savedLead.getName(),
+                    dto.getCompanyId());
+        }
+
         return savedLead;
     }
 
@@ -63,6 +73,7 @@ public class LeadService {
 
     public Lead updateLead(Long id, LeadDTO dto) {
         Lead lead = getLeadById(id);
+        Long oldAssignee = lead.getAssignedTo();
 
         // Track changes
         if (dto.getStatus() != null && !dto.getStatus().equalsIgnoreCase(lead.getStatus().name())) {
@@ -79,7 +90,19 @@ public class LeadService {
         }
 
         mapDtoToEntity(dto, lead);
-        return leadRepository.save(lead);
+        Lead savedLead = leadRepository.save(lead);
+
+        // Notify if assignment changed
+        if (dto.getAssignedTo() != null && !dto.getAssignedTo().equals(oldAssignee)) {
+            System.out.println("Triggering notification for Lead assignment. New: " + dto.getAssignedTo() + ", Old: "
+                    + oldAssignee);
+            sendAssignmentNotification(dto.getAssignedTo(), "Lead", savedLead.getId(), savedLead.getName(),
+                    lead.getCompanyId());
+        } else {
+            System.out.println("No notification triggered. New: " + dto.getAssignedTo() + ", Old: " + oldAssignee);
+        }
+
+        return savedLead;
     }
 
     public Lead updateLeadStatus(Long id, String status) {
@@ -130,5 +153,25 @@ public class LeadService {
         history.setCompanyId(companyId);
         // history.setChangedBy(userId); // TODO: Add user context
         leadHistoryRepository.save(history);
+    }
+
+    private void sendAssignmentNotification(Long recipientId, String type, Long referenceId, String name,
+            String companyId) {
+        try {
+            java.util.Map<String, Object> notification = new java.util.HashMap<>();
+            notification.put("recipientUserId", recipientId);
+            notification.put("type", "IN_APP");
+            notification.put("title", "New " + type + " Assigned");
+            notification.put("message", "You have been assigned a new " + type + ": " + name);
+            notification.put("source", "CUSTOMER_SERVICE");
+            notification.put("referenceType", type.toUpperCase()); // LEAD or CUSTOMER
+            notification.put("referenceId", referenceId);
+            notification.put("status", "PENDING");
+
+            notificationClient.sendNotification(notification);
+        } catch (Exception e) {
+            System.err.println("Failed to send notification: " + e.getMessage());
+            // Don't fail the transaction just because notification failed
+        }
     }
 }

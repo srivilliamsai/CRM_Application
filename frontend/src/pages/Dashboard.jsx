@@ -21,6 +21,7 @@ import ActivitiesPage from './dashboard/ActivitiesPage';
 import AnalyticsDashboard from './dashboard/AnalyticsDashboard';
 import IntegrationsPage from './dashboard/IntegrationsPage';
 import WorkflowsPage from './dashboard/WorkflowsPage';
+import NotificationsPage from './dashboard/NotificationsPage';
 
 export default function Dashboard() {
     const user = getUser();
@@ -71,6 +72,7 @@ export default function Dashboard() {
                         <Route path="/team" element={<TeamPage />} />
                         <Route path="/integrations" element={<IntegrationsPage />} />
                         <Route path="/workflows" element={<WorkflowsPage />} />
+                        <Route path="/notifications" element={<NotificationsPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/help" element={<HelpPage />} />
                     </Routes>

@@ -15,6 +15,9 @@ public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private com.crm.customer.client.NotificationClient notificationClient;
+
     // ========== CREATE ==========
 
     public Customer createCustomer(CustomerDTO dto) {
@@ -25,7 +28,15 @@ public class CustomerService {
 
         Customer customer = new Customer();
         mapDtoToEntity(dto, customer);
-        return customerRepository.save(customer);
+        Customer savedCustomer = customerRepository.save(customer);
+
+        // Notify if assigned
+        if (savedCustomer.getAssignedTo() != null) {
+            sendAssignmentNotification(savedCustomer.getAssignedTo(), "Customer", savedCustomer.getId(),
+                    savedCustomer.getFirstName() + " " + savedCustomer.getLastName());
+        }
+
+        return savedCustomer;
     }
 
     // ========== READ ==========
@@ -54,8 +65,23 @@ public class CustomerService {
 
     public Customer updateCustomer(Long id, CustomerDTO dto) {
         Customer customer = getCustomerById(id);
+        Long oldAssignee = customer.getAssignedTo();
+
         mapDtoToEntity(dto, customer);
-        return customerRepository.save(customer);
+        Customer savedCustomer = customerRepository.save(customer);
+
+        // Notify if assignment changed
+        if (dto.getAssignedTo() != null && !dto.getAssignedTo().equals(oldAssignee)) {
+            System.out.println("Triggering notification for Customer assignment. New: " + dto.getAssignedTo()
+                    + ", Old: " + oldAssignee);
+            sendAssignmentNotification(dto.getAssignedTo(), "Customer", savedCustomer.getId(),
+                    savedCustomer.getFirstName() + " " + savedCustomer.getLastName());
+        } else {
+            System.out.println(
+                    "No notification triggered for Customer. New: " + dto.getAssignedTo() + ", Old: " + oldAssignee);
+        }
+
+        return savedCustomer;
     }
 
     // ========== DELETE ==========
@@ -86,6 +112,28 @@ public class CustomerService {
 
         if (dto.getCompanyId() != null) {
             customer.setCompanyId(dto.getCompanyId());
+        }
+
+        if (dto.getAssignedTo() != null) {
+            customer.setAssignedTo(dto.getAssignedTo());
+        }
+    }
+
+    private void sendAssignmentNotification(Long recipientId, String type, Long referenceId, String name) {
+        try {
+            java.util.Map<String, Object> notification = new java.util.HashMap<>();
+            notification.put("recipientUserId", recipientId);
+            notification.put("type", "IN_APP");
+            notification.put("title", "New " + type + " Assigned");
+            notification.put("message", "You have been assigned a new " + type + ": " + name);
+            notification.put("source", "CUSTOMER_SERVICE");
+            notification.put("referenceType", type.toUpperCase()); // LEAD or CUSTOMER
+            notification.put("referenceId", referenceId);
+            notification.put("status", "PENDING");
+
+            notificationClient.sendNotification(notification);
+        } catch (Exception e) {
+            System.err.println("Failed to send notification: " + e.getMessage());
         }
     }
 }

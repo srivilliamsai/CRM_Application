@@ -89,8 +89,8 @@ export default function AdminDashboard() {
                         </span>
                     </div>
                 </div>
-                {/* Debug: Show Permissions */}
-                <div className="mt-3 pt-3 border-t border-blue-200/50 dark:border-blue-800/50">
+                {/* Debug: Permission List (Hidden) */}
+                {/* <div className="mt-3 pt-3 border-t border-blue-200/50 dark:border-blue-800/50">
                     <p className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 mb-1.5 uppercase tracking-wider">Active Permissions</p>
                     <div className="flex flex-wrap gap-2">
                         {user?.permissions && user.permissions.length > 0 ? (
@@ -100,10 +100,10 @@ export default function AdminDashboard() {
                                 </span>
                             ))
                         ) : (
-                            <span className="text-xs text-gray-500 italic">No specific permissions assigned (or re-login required)</span>
+                            <span className="text-[10px] text-gray-400 italic">No specific permissions assigned</span>
                         )}
                     </div>
-                </div>
+                </div> */}
             </div>
 
             {/* Stats Grid - Team */}
