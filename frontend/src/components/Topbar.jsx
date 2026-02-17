@@ -16,15 +16,26 @@ export default function TopBar({ toggleSidebar }) {
     const handleRequestAccess = async () => {
         if (!requestMessage.trim()) return;
 
-        // Simulating an API call or notification
-        console.log("Requesting access:", requestMessage);
+        try {
+            await sendNotification({
+                recipientUserId: 1, // Admin ID as per instruction
+                type: 'IN_APP',
+                title: `Access Request from ${user.username}`,
+                message: requestMessage,
+                source: 'USER_DASHBOARD',
+                status: 'SENT'
+            });
 
-        // Close modal and reset message
-        setIsRequestModalOpen(false);
-        setRequestMessage('');
-
-        // Optional: You could add a toast notification here later
+            // Close modal and reset message
+            setIsRequestModalOpen(false);
+            setRequestMessage('');
+            alert('Request sent to admin successfully!');
+        } catch (error) {
+            console.error("Failed to send request", error);
+            alert('Failed to send request. Please try again.');
+        }
     };
+
 
     React.useEffect(() => {
         if (user?.id) {
