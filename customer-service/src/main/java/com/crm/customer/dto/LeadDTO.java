@@ -1,8 +1,8 @@
 package com.crm.customer.dto;
 
-import lombok.Data;
-
 import javax.validation.constraints.NotBlank;
+
+import lombok.Data;
 
 @Data
 public class LeadDTO {

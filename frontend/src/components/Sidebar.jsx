@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard, Users, UserPlus, FileText,
-    BarChart2, Settings, HelpCircle, LogOut, Megaphone, Headphones
+    BarChart2, Settings, HelpCircle, LogOut, Megaphone, Headphones, Calendar
 } from 'lucide-react';
 import { logout, getUser } from '../services/api';
 
@@ -46,6 +46,7 @@ export default function Sidebar() {
                 <NavItem to="/dashboard" icon={<LayoutDashboard size={20} />} label="Overview" end />
                 <NavItem to="/dashboard/leads" icon={<UserPlus size={20} />} label="Leads" />
                 <NavItem to="/dashboard/customers" icon={<Users size={20} />} label="Customers" />
+                <NavItem to="/dashboard/activities" icon={<Calendar size={20} />} label="Activities" />
                 <NavItem to="/dashboard/deals" icon={<FileText size={20} />} label="Deals" />
                 <NavItem to="/dashboard/marketing" icon={<Megaphone size={20} />} label="Marketing" />
                 <NavItem to="/dashboard/tickets" icon={<Headphones size={20} />} label="Tickets" />
@@ -53,12 +54,14 @@ export default function Sidebar() {
                 <div className="px-3 mt-8 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Analytics
                 </div>
-                <NavItem to="/dashboard/reports" icon={<BarChart2 size={20} />} label="Reports" />
+                <NavItem to="/dashboard/analytics" icon={<BarChart2 size={20} />} label="Analytics" />
                 <NavItem to="/dashboard/team" icon={<Users size={20} />} label="Team" />
 
                 <div className="px-3 mt-8 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     System
                 </div>
+                <NavItem to="/dashboard/workflows" icon={<Settings size={20} />} label="Workflows" />
+                <NavItem to="/dashboard/integrations" icon={<Settings size={20} />} label="Integrations" />
                 <NavItem to="/dashboard/settings" icon={<Settings size={20} />} label="Settings" />
                 <NavItem to="/dashboard/help" icon={<HelpCircle size={20} />} label="Help & Support" />
             </div>

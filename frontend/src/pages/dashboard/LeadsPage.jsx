@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { getAllLeads, createLead, updateLead, deleteLead, createCustomer, updateLeadStatus, getLeadHistory } from '../../services/api';
-import { Plus, Search, Filter, MoreVertical, Phone, Mail, X, Edit, Trash2, UserCheck, Eye, Clock, FileText, Activity } from 'lucide-react';
+import { getAllLeads, createLead, updateLead, deleteLead, createCustomer, updateLeadStatus, getLeadHistory, getUser } from '../../services/api';
+import { Plus, Search, Filter, MoreVertical, Phone, Mail, X, Edit, Trash2, UserCheck, Eye, Clock, FileText, Activity, Upload, LayoutGrid, List, User, CheckSquare, Calendar, Star, Flame } from 'lucide-react';
+import ImportWizard from '../../components/leads/ImportWizard';
 
 const INITIAL_FORM = { name: '', email: '', phone: '', company: '', source: '', status: 'NEW', score: 0, notes: '' };
 const INITIAL_CONVERT_FORM = { firstName: '', lastName: '', email: '', phone: '', company: '', status: 'ACTIVE', source: '' };
@@ -8,6 +9,11 @@ const INITIAL_CONVERT_FORM = { firstName: '', lastName: '', email: '', phone: ''
 export default function LeadsPage() {
     const [leads, setLeads] = useState([]);
     const [loading, setLoading] = useState(true);
+    const user = getUser();
+
+    // Tabs & Filtering
+    const [activeTab, setActiveTab] = useState('all'); // all, prospect, follow-up, interested, future-prospect
+    const [quickFilter, setQuickFilter] = useState(null); // STARRED, ENGAGED
 
     // Modal & Form States
     const [showModal, setShowModal] = useState(false);
@@ -23,6 +29,9 @@ export default function LeadsPage() {
     const [showViewModal, setShowViewModal] = useState(false);
     const [viewLead, setViewLead] = useState(null);
     const [leadHistory, setLeadHistory] = useState([]);
+
+    // Import Modal State
+    const [showImportWizard, setShowImportWizard] = useState(false);
 
     // Dropdown State
     const [activeDropdown, setActiveDropdown] = useState(null);
@@ -45,6 +54,37 @@ export default function LeadsPage() {
     };
 
     useEffect(() => { fetchLeads(); }, []);
+
+    // --- Filter Logic ---
+    // Tabs for Smart Views
+    const tabs = [
+        { id: 'all', label: 'All Leads', icon: List },
+        { id: 'prospect', label: 'Prospect', icon: User },
+        { id: 'follow-up', label: 'Follow-up', icon: Phone },
+        { id: 'interested', label: 'Interested', icon: CheckSquare },
+        { id: 'future-prospect', label: 'Future Prospect', icon: Calendar }
+    ];
+
+    const getFilteredLeads = () => {
+        let result = [...leads]; // Start with a copy of all leads
+
+        // Tab Filtering
+        if (activeTab === 'prospect') result = result.filter(l => l.status === 'NEW' || l.stage === 'PROSPECT');
+        if (activeTab === 'follow-up') result = result.filter(l => l.status === 'CONTACTED');
+        if (activeTab === 'interested') result = result.filter(l => l.status === 'QUALIFIED');
+        if (activeTab === 'future-prospect') result = result.filter(l => l.status === 'NURTURING');
+
+        // 2. Quick Filters
+        if (quickFilter === 'STARRED') {
+            result = result.filter(l => l.isStarred); // Assuming isStarred exists or will be added
+        } else if (quickFilter === 'ENGAGED') {
+            result = result.filter(l => l.status === 'CONTACTED' || l.status === 'QUALIFIED');
+        }
+
+        return result;
+    };
+
+    const displayedLeads = getFilteredLeads();
 
     // Close dropdown when clicking outside
     // Close dropdown when clicking outside or scrolling
@@ -226,10 +266,16 @@ export default function LeadsPage() {
                     <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Leads</h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">Manage and track your potential customers.</p>
                 </div>
-                <button onClick={openCreateModal} className="btn-primary flex items-center gap-2">
-                    <Plus size={20} />
-                    Add Lead
-                </button>
+                <div className="flex gap-3">
+                    <button onClick={() => setShowImportWizard(true)} className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                        <Upload size={18} />
+                        Import
+                    </button>
+                    <button onClick={openCreateModal} className="btn-primary flex items-center gap-2">
+                        <Plus size={20} />
+                        Add Lead
+                    </button>
+                </div>
             </div>
 
             {loading ? (
@@ -252,6 +298,26 @@ export default function LeadsPage() {
                 </div>
             ) : (
                 <>
+                    {/* Tabs */}
+                    <div className="flex bg-gray-100 dark:bg-gray-800/50 p-1 rounded-xl mb-4 self-start">
+                        {tabs.map((tab) => {
+                            const Icon = tab.icon;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id
+                                        ? 'bg-white dark:bg-card text-gray-900 dark:text-white shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                                        }`}
+                                >
+                                    <Icon size={16} />
+                                    {tab.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+
                     {/* Filters */}
                     <div className="flex gap-4 bg-white dark:bg-card p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
                         <div className="relative flex-1">
@@ -593,6 +659,17 @@ export default function LeadsPage() {
                         </form>
                     </div>
                 </div>
+            )}
+
+            {/* Import Wizard */}
+            {showImportWizard && (
+                <ImportWizard
+                    onClose={() => setShowImportWizard(false)}
+                    onComplete={() => {
+                        setShowImportWizard(false);
+                        fetchLeads();
+                    }}
+                />
             )}
 
             {/* Convert to Customer Modal */}

@@ -1,12 +1,13 @@
 package com.crm.customer.service;
 
-import com.crm.customer.dto.CustomerDTO;
-import com.crm.customer.entity.Customer;
-import com.crm.customer.repository.CustomerRepository;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.crm.customer.dto.CustomerDTO;
+import com.crm.customer.entity.Customer;
+import com.crm.customer.repository.CustomerRepository;
 
 @Service
 public class CustomerService {

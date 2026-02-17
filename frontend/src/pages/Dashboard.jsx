@@ -17,6 +17,10 @@ import CampaignsPage from './dashboard/CampaignsPage';
 import SupportDashboard from './dashboard/SupportDashboard';
 import TicketsPage from './dashboard/TicketsPage';
 import AdminDashboard from './dashboard/AdminDashboard';
+import ActivitiesPage from './dashboard/ActivitiesPage';
+import AnalyticsDashboard from './dashboard/AnalyticsDashboard';
+import IntegrationsPage from './dashboard/IntegrationsPage';
+import WorkflowsPage from './dashboard/WorkflowsPage';
 
 export default function Dashboard() {
     const user = getUser();
@@ -53,16 +57,20 @@ export default function Dashboard() {
             <div className="flex-1 lg:ml-64 flex flex-col min-h-screen transition-all duration-300">
                 <TopBar />
 
-                <main className="flex-1 pt-24 pb-12 px-6 overflow-y-auto">
+                <main className="flex-1 pt-6 pb-12 px-6 overflow-y-auto">
                     <Routes>
                         <Route path="/" element={getDashboardByRole()} />
                         <Route path="/leads" element={<LeadsPage />} />
                         <Route path="/customers" element={<CustomersPage />} />
+                        <Route path="/activities" element={<ActivitiesPage />} />
                         <Route path="/deals" element={<DealsPage />} />
                         <Route path="/marketing" element={<CampaignsPage />} />
                         <Route path="/tickets" element={<TicketsPage />} />
-                        <Route path="/reports" element={<ReportsPage />} />
+                        <Route path="/analytics" element={<AnalyticsDashboard />} />
+                        <Route path="/reports" element={<ReportsPage />} /> {/* Kept for backward compatibility if needed, or remove */}
                         <Route path="/team" element={<TeamPage />} />
+                        <Route path="/integrations" element={<IntegrationsPage />} />
+                        <Route path="/workflows" element={<WorkflowsPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/help" element={<HelpPage />} />
                     </Routes>

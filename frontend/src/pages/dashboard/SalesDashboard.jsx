@@ -1,21 +1,24 @@
 import { useState, useEffect } from 'react';
-import { getUser, getAllUsers, getAllDeals } from '../../services/api';
+import { getUser, getAllUsers, getAllDeals, getAllLeads } from '../../services/api';
 import { ArrowUp, ArrowDown, DollarSign, Target, Users, TrendingUp, Phone, Calendar, Briefcase } from 'lucide-react';
-import { BarChart } from 'lucide-react';
+import LeadFunnelChart from '../../components/charts/LeadFunnelChart';
+import DailyTrendChart from '../../components/charts/DailyTrendChart';
 
 export default function SalesDashboard() {
     const user = getUser();
     const firstName = user?.fullName?.split(' ')[0] || 'Sales Agent';
     const [salesTeam, setSalesTeam] = useState([]);
     const [deals, setDeals] = useState([]);
+    const [leads, setLeads] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [usersData, dealsData] = await Promise.allSettled([
+                const [usersData, dealsData, leadsData] = await Promise.allSettled([
                     getAllUsers(user?.companyId),
-                    getAllDeals()
+                    getAllDeals(),
+                    getAllLeads()
                 ]);
 
                 if (usersData.status === 'fulfilled') {
@@ -24,6 +27,9 @@ export default function SalesDashboard() {
                 }
                 if (dealsData.status === 'fulfilled') {
                     setDeals(dealsData.value);
+                }
+                if (leadsData.status === 'fulfilled') {
+                    setLeads(leadsData.value);
                 }
             } catch (error) {
                 console.error("Failed to fetch data", error);
@@ -44,11 +50,30 @@ export default function SalesDashboard() {
     };
 
     // Pipeline stage counts for funnel
-    const stages = ['PROSPECTING', 'QUALIFICATION', 'PROPOSAL', 'NEGOTIATION'];
-    const stageData = stages.map(stage => ({
-        name: stage.charAt(0) + stage.slice(1).toLowerCase(),
-        count: deals.filter(d => d.stage === stage).length
+    const stages = ['PROSPECTING', 'QUALIFICATION', 'PROPOSAL', 'NEGOTIATION', 'CLOSED_WON'];
+    const funnelData = stages.map(stage => ({
+        name: stage.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()),
+        value: deals.filter(d => d.stage === stage).length
     }));
+
+    // Daily Lead Trend Data (Last 30 Days)
+    const getLast30Days = () => {
+        const days = [];
+        for (let i = 29; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            days.push(date.toISOString().split('T')[0]);
+        }
+        return days;
+    };
+
+    // Process leads into daily counts
+    const dailyTrendData = getLast30Days().map(date => {
+        const count = leads.filter(l => l.createdAt && l.createdAt.startsWith(date)).length;
+        // Format date for display (e.g., "Sep 1")
+        const displayDate = new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return { date: displayDate, count };
+    });
 
     return (
         <div className="space-y-6">
@@ -84,69 +109,66 @@ export default function SalesDashboard() {
                 <StatCard title="Win Rate" value={`${winRate}%`} change={deals.length > 0 ? `Based on ${deals.length} deals` : "No data"} icon={<ArrowUp size={24} />} color="emerald" />
             </div>
 
-            {/* Sales Pipeline + Active Deals */}
+            {/* Charts Section: Funnel & Trends */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Pipeline Funnel */}
                 <div className="glass-card p-6">
-                    <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Pipeline Stages</h3>
-                    {deals.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center text-center min-h-[200px]">
-                            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-full mb-4">
-                                <TrendingUp size={32} className="text-blue-500" />
+                    <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
+                        <Target size={18} /> Lead Funnel
+                    </h3>
+                    <div className="h-[300px]">
+                        {deals.length > 0 ? (
+                            <LeadFunnelChart data={funnelData} />
+                        ) : (
+                            <div className="flex h-full items-center justify-center text-gray-400">
+                                No deal data available
                             </div>
-                            <p className="text-gray-500 dark:text-gray-400 max-w-sm text-sm">
-                                Start adding deals to visualize your sales funnel here.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            {stageData.map((stage) => {
-                                const maxCount = Math.max(...stageData.map(s => s.count), 1);
-                                const width = Math.max((stage.count / maxCount) * 100, 10);
-                                return (
-                                    <div key={stage.name} className="flex items-center gap-3">
-                                        <span className="text-xs font-medium text-gray-500 w-24 text-right">{stage.name}</span>
-                                        <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-8 overflow-hidden">
-                                            <div
-                                                className="bg-gradient-to-r from-primary to-emerald-500 h-full rounded-full flex items-center justify-end pr-3 transition-all duration-500"
-                                                style={{ width: `${width}%` }}
-                                            >
-                                                <span className="text-xs font-bold text-white">{stage.count}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
 
-                {/* Recent Active Deals */}
+                {/* Daily Lead Trend */}
                 <div className="glass-card p-6">
-                    <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Active Deals</h3>
-                    {activeDeals.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center text-center min-h-[200px]">
-                            <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-full mb-4">
-                                <Briefcase size={32} className="text-purple-500" />
+                    <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
+                        <TrendingUp size={18} /> Daily Lead Addition
+                    </h3>
+                    <div className="h-[300px]">
+                        {leads.length > 0 ? (
+                            <DailyTrendChart data={dailyTrendData} />
+                        ) : (
+                            <div className="flex h-full items-center justify-center text-gray-400">
+                                No lead data available
                             </div>
-                            <p className="text-gray-500 dark:text-gray-400 max-w-sm text-sm">
-                                No active deals yet. Create a new deal to get started.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                            {activeDeals.slice(0, 8).map((deal) => (
-                                <div key={deal.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{deal.title}</p>
-                                        <p className="text-xs text-gray-500">{deal.stage?.replace('_', ' ')}</p>
-                                    </div>
-                                    <span className="text-sm font-bold text-primary ml-3">{formatCurrency(deal.value || 0)}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
+            </div>
+
+            {/* Recent Active Deals */}
+            <div className="glass-card p-6">
+                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Active Deals</h3>
+                {activeDeals.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center text-center min-h-[200px]">
+                        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-full mb-4">
+                            <Briefcase size={32} className="text-purple-500" />
+                        </div>
+                        <p className="text-gray-500 dark:text-gray-400 max-w-sm text-sm">
+                            No active deals yet. Create a new deal to get started.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                        {activeDeals.slice(0, 8).map((deal) => (
+                            <div key={deal.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{deal.title}</p>
+                                    <p className="text-xs text-gray-500">{deal.stage?.replace('_', ' ')}</p>
+                                </div>
+                                <span className="text-sm font-bold text-primary ml-3">{formatCurrency(deal.value || 0)}</span>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Sales Team */}

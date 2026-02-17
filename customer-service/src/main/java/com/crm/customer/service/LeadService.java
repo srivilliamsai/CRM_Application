@@ -1,14 +1,15 @@
 package com.crm.customer.service;
 
-import com.crm.customer.dto.LeadDTO;
-import com.crm.customer.entity.Lead;
-import com.crm.customer.entity.LeadHistory;
-import com.crm.customer.repository.LeadRepository;
-import com.crm.customer.repository.LeadHistoryRepository;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.crm.customer.dto.LeadDTO;
+import com.crm.customer.entity.Lead;
+import com.crm.customer.entity.LeadHistory;
+import com.crm.customer.repository.LeadHistoryRepository;
+import com.crm.customer.repository.LeadRepository;
 
 @Service
 public class LeadService {

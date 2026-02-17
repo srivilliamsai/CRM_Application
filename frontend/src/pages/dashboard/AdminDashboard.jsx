@@ -68,34 +68,34 @@ export default function AdminDashboard() {
     ].filter(d => d.value > 0);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             {/* Welcome Banner */}
-            <div className="glass-card p-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-l-4 border-l-blue-500">
+            <div className="glass-card p-5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-l-4 border-l-blue-500">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                             Welcome back, {firstName}! 👋
                         </h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">
                             Here's the holistic view of your business. {stats.leads > 0 || stats.deals > 0
                                 ? `${stats.leads} leads, ${stats.deals} deals, ${stats.customers} customers tracked.`
                                 : 'Start adding data to see your business dashboard come to life.'}
                         </p>
                     </div>
-                    <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                        <Shield size={20} className="text-blue-500" />
-                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                    <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                        <Shield size={18} className="text-blue-500" />
+                        <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
                             {role.charAt(0) + role.slice(1).toLowerCase()} Team
                         </span>
                     </div>
                 </div>
                 {/* Debug: Show Permissions */}
-                <div className="mt-4 pt-4 border-t border-blue-200/50 dark:border-blue-800/50">
-                    <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2 uppercase tracking-wider">Active Permissions</p>
+                <div className="mt-3 pt-3 border-t border-blue-200/50 dark:border-blue-800/50">
+                    <p className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 mb-1.5 uppercase tracking-wider">Active Permissions</p>
                     <div className="flex flex-wrap gap-2">
                         {user?.permissions && user.permissions.length > 0 ? (
                             user.permissions.map((perm, idx) => (
-                                <span key={idx} className="text-[10px] px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-mono border border-blue-200 dark:border-blue-800">
+                                <span key={idx} className="text-[10px] px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-mono border border-blue-200 dark:border-blue-800">
                                     {perm}
                                 </span>
                             ))
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Stats Grid - Team */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard title="Total Team" value={users.length} change="Active members" icon={<Users size={24} />} color="blue" />
                 <StatCard title="Sales Team" value={users.filter(u => u.roles && u.roles.includes('ROLE_SALES')).length} change="Members" icon={<DollarSign size={24} />} color="green" />
                 <StatCard title="Marketing Team" value={users.filter(u => u.roles && u.roles.includes('ROLE_MARKETING')).length} change="Members" icon={<ShoppingBag size={24} />} color="purple" />
@@ -125,9 +125,9 @@ export default function AdminDashboard() {
             </div>
 
             {/* Role Distribution & Team Members */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Role Distribution Pie Chart */}
-                <div className="glass-card p-6">
+                <div className="glass-card p-5">
                     <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Role Distribution</h3>
                     {roleData.length === 0 ? (
                         <div className="flex flex-col items-center justify-center min-h-[250px] text-center">

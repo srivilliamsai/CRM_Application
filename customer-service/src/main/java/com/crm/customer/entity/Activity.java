@@ -1,11 +1,20 @@
 package com.crm.customer.entity;
 
+import java.time.LocalDateTime;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "activities")
@@ -35,9 +44,19 @@ public class Activity {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    // Phone Call Specific Fields
+    private LocalDateTime startTime;
+    private Integer duration; // in seconds
+    private String outcome; // e.g., Answered, Missed, Voicemail
+    private String direction; // INBOUND, OUTBOUND
+    private String recordingUrl;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        if (startTime == null) {
+            startTime = LocalDateTime.now();
+        }
     }
 
     public enum ActivityType {

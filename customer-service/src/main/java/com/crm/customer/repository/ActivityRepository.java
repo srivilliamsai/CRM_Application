@@ -1,15 +1,18 @@
 package com.crm.customer.repository;
 
-import com.crm.customer.entity.Activity;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.crm.customer.entity.Activity;
 
 @Repository
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     List<Activity> findByCustomerIdOrderByCreatedAtDesc(Long customerId);
+
+    List<Activity> findAllByOrderByCreatedAtDesc();
 
     List<Activity> findByPerformedBy(Long userId);
 }

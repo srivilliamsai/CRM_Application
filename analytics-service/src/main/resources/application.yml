@@ -5,7 +5,7 @@ spring:
   application:
     name: analytics-service
   datasource:
-    url: jdbc:mysql://localhost:3306/analytics_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/analytics_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: srivilliamsai
     driver-class-name: com.mysql.cj.jdbc.Driver

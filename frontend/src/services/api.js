@@ -208,6 +208,11 @@ export const deleteNote = async (id) => {
 
 // ============ Activities (customer-service) ============
 
+export const getAllActivities = async () => {
+    const response = await CUSTOMER_API.get('/activities');
+    return response.data;
+};
+
 export const getActivitiesByCustomer = async (customerId) => {
     const response = await CUSTOMER_API.get(`/activities/customer/${customerId}`);
     return response.data;
@@ -368,6 +373,8 @@ export const addTicketResponse = async (id, data) => {
 
 // ============ Analytics (analytics-service) ============
 
+// ============ Analytics (analytics-service) ============
+
 export const getDashboardAnalytics = async () => {
     const response = await ANALYTICS_API.get('/analytics/dashboard');
     return response.data;
@@ -375,6 +382,77 @@ export const getDashboardAnalytics = async () => {
 
 export const getAllReports = async () => {
     const response = await ANALYTICS_API.get('/analytics/reports');
+    return response.data;
+};
+
+export const createReport = async (data) => {
+    const response = await ANALYTICS_API.post('/analytics/reports', data);
+    return response.data;
+};
+
+export const deleteReport = async (id) => {
+    await ANALYTICS_API.delete(`/analytics/reports/${id}`);
+};
+
+// ============ Integrations (integration-service) ============
+
+const INTEGRATION_API = axios.create({
+    baseURL: 'http://localhost:8088/api',
+    headers: { 'Content-Type': 'application/json' },
+});
+
+INTEGRATION_API.interceptors.request.use(addToken);
+
+export const getIntegrationStatus = async () => {
+    const response = await INTEGRATION_API.get('/integrations/status');
+    return response.data;
+};
+
+export const sendEmail = async (data) => {
+    const response = await INTEGRATION_API.post('/integrations/email/send', data);
+    return response.data;
+};
+
+export const sendWebhook = async (data) => {
+    const response = await INTEGRATION_API.post('/integrations/webhook/send', data);
+    return response.data;
+};
+
+// ============ Workflows (workflow-service) ============
+
+const WORKFLOW_API = axios.create({
+    baseURL: 'http://localhost:8087/api',
+    headers: { 'Content-Type': 'application/json' },
+});
+
+WORKFLOW_API.interceptors.request.use(addToken);
+
+export const getAllRules = async () => {
+    const response = await WORKFLOW_API.get('/workflows/rules');
+    return response.data;
+};
+
+export const createRule = async (data) => {
+    const response = await WORKFLOW_API.post('/workflows/rules', data);
+    return response.data;
+};
+
+export const updateRule = async (id, data) => {
+    const response = await WORKFLOW_API.put(`/workflows/rules/${id}`, data);
+    return response.data;
+};
+
+export const toggleRule = async (id) => {
+    const response = await WORKFLOW_API.put(`/workflows/rules/${id}/toggle`);
+    return response.data;
+};
+
+export const deleteRule = async (id) => {
+    await WORKFLOW_API.delete(`/workflows/rules/${id}`);
+};
+
+export const getWorkflowLogs = async () => {
+    const response = await WORKFLOW_API.get('/workflows/logs');
     return response.data;
 };
 
@@ -404,6 +482,7 @@ export const markAsRead = async (id) => {
 
 export const markAllAsRead = async (userId) => {
     await NOTIFICATION_API.put(`/user/${userId}/read-all`);
+    return response.data;
 };
 
 export const sendNotification = async (data) => {
