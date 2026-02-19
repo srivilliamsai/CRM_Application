@@ -12,5 +12,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     List<Report> findByType(String type);
 
+    List<Report> findByCompanyId(String companyId);
+
     List<Report> findByCreatedBy(Long userId);
 }

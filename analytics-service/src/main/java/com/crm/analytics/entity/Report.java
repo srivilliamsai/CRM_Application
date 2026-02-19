@@ -42,6 +42,9 @@ public class Report {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(length = 50)
+    private String companyId;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

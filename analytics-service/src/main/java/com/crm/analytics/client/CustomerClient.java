@@ -18,5 +18,6 @@ public interface CustomerClient {
             @org.springframework.web.bind.annotation.RequestParam("companyId") String companyId);
 
     @GetMapping("/api/activities")
-    List<Map<String, Object>> getAllActivities();
+    List<Map<String, Object>> getAllActivities(
+            @org.springframework.web.bind.annotation.RequestParam("companyId") String companyId);
 }

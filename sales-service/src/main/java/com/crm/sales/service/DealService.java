@@ -85,5 +85,18 @@ public class DealService {
         if (dto.getStage() != null) {
             deal.setStage(Deal.DealStage.valueOf(dto.getStage().toUpperCase()));
         }
+
+        if (dto.getType() != null) {
+            try {
+                deal.setType(Deal.DealType.valueOf(dto.getType().toUpperCase()));
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+
+        deal.setLeadSource(dto.getLeadSource());
+        deal.setNextStep(dto.getNextStep());
+        deal.setProbability(dto.getProbability());
+        deal.setCampaignSource(dto.getCampaignSource());
     }
 }

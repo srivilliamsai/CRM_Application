@@ -8,7 +8,10 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "campaigns")
+@Table(name = "campaigns", indexes = {
+        @Index(name = "idx_campaign_company_id", columnList = "companyId"),
+        @Index(name = "idx_campaign_status", columnList = "status")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -45,6 +48,11 @@ public class Campaign {
     private Integer sentCount = 0;
     private Integer openCount = 0;
     private Integer clickCount = 0;
+    private Integer conversionCount = 0;
+    private Double bounceRate = 0.0;
+
+    private boolean isDeleted = false;
+    private LocalDateTime deletedAt;
 
     private Long createdBy;
 

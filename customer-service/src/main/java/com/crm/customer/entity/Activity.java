@@ -11,13 +11,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Index;
+import javax.persistence.PreUpdate;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "activities")
+@Table(name = "activities", indexes = {
+        @Index(name = "idx_activity_company_id", columnList = "companyId"),
+        @Index(name = "idx_activity_type", columnList = "type"),
+        @Index(name = "idx_activity_customer_id", columnList = "customerId"),
+        @Index(name = "idx_activity_lead_id", columnList = "leadId")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -46,8 +53,13 @@ public class Activity {
     @Column(length = 36)
     private String companyId;
 
+    private boolean isDeleted = false;
+    private LocalDateTime deletedAt;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
     // Phone Call Specific Fields
     private LocalDateTime startTime;
@@ -62,6 +74,12 @@ public class Activity {
         if (startTime == null) {
             startTime = LocalDateTime.now();
         }
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 
     public enum ActivityType {

@@ -20,15 +20,9 @@ export default function Navbar() {
             <div className={`max-w-4xl mx-auto px-6 transition-all duration-300 ${scrolled ? 'bg-white/70 dark:bg-black/50 backdrop-blur-xl border border-gray-200 dark:border-white/10 shadow-2xl' : 'bg-transparent border border-transparent'} rounded-full`}>
                 <div className="flex items-center justify-between h-14">
 
-                    {/* Logo */}
                     <div className="flex-shrink-0">
-                        <Link to="/" className="flex items-center gap-2 group">
-                            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover:rotate-12 transition-transform">
-                                U
-                            </div>
-                            <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-                                UniQ CRM
-                            </span>
+                        <Link to="/" className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
+                            <span className="text-primary">UniQ</span> CRM
                         </Link>
                     </div>
 

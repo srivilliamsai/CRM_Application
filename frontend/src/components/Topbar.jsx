@@ -120,7 +120,7 @@ export default function TopBar({ toggleSidebar }) {
                     <Menu size={20} />
                 </button>
                 <div className="hidden md:flex items-center">
-                    {getBreadcrumbs()}
+                    {/* Breadcrumbs removed as per user request */}
                 </div>
             </div>
 

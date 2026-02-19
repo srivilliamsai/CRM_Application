@@ -5,8 +5,8 @@ import DealStats from './DealStats';
 import { PipelineChart, RevenueChart } from './DealCharts';
 
 const COLUMNS = {
-    PROSPECTING: { id: 'PROSPECTING', title: 'Prospecting', color: 'bg-blue-500', light: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-700 dark:text-blue-300' },
-    QUALIFICATION: { id: 'QUALIFICATION', title: 'Qualification', color: 'bg-yellow-500', light: 'bg-yellow-50 dark:bg-yellow-900/20', text: 'text-yellow-700 dark:text-yellow-300' },
+    NEW: { id: 'NEW', title: 'New', color: 'bg-blue-500', light: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-700 dark:text-blue-300' },
+    QUALIFIED: { id: 'QUALIFIED', title: 'Qualified', color: 'bg-yellow-500', light: 'bg-yellow-50 dark:bg-yellow-900/20', text: 'text-yellow-700 dark:text-yellow-300' },
     PROPOSAL: { id: 'PROPOSAL', title: 'Proposal', color: 'bg-indigo-500', light: 'bg-indigo-50 dark:bg-indigo-900/20', text: 'text-indigo-700 dark:text-indigo-300' },
     NEGOTIATION: { id: 'NEGOTIATION', title: 'Negotiation', color: 'bg-purple-500', light: 'bg-purple-50 dark:bg-purple-900/20', text: 'text-purple-700 dark:text-purple-300' },
     CLOSED_WON: { id: 'CLOSED_WON', title: 'Closed Won', color: 'bg-green-500', light: 'bg-green-50 dark:bg-green-900/20', text: 'text-green-700 dark:text-green-300' },
@@ -34,9 +34,14 @@ export default function DealsPage() {
         title: '',
         description: '',
         value: '',
-        stage: 'PROSPECTING',
+        stage: 'NEW',
         priority: 'MEDIUM',
         expectedCloseDate: '',
+        type: 'NEW_BUSINESS',
+        leadSource: '',
+        nextStep: '',
+        probability: '',
+        campaignSource: '',
         customerId: ''
     });
     const [saving, setSaving] = useState(false);
@@ -70,6 +75,11 @@ export default function DealsPage() {
             stage: deal.stage,
             priority: deal.priority,
             expectedCloseDate: deal.expectedCloseDate || '',
+            type: deal.type || 'NEW_BUSINESS',
+            leadSource: deal.leadSource || '',
+            nextStep: deal.nextStep || '',
+            probability: deal.probability || '',
+            campaignSource: deal.campaignSource || '',
             customerId: deal.customer ? deal.customer.id : (deal.customerId || '')
         });
         setIsEditing(true);
@@ -99,9 +109,14 @@ export default function DealsPage() {
             title: '',
             description: '',
             value: '',
-            stage: 'PROSPECTING',
+            stage: 'NEW',
             priority: 'MEDIUM',
             expectedCloseDate: '',
+            type: 'NEW_BUSINESS',
+            leadSource: '',
+            nextStep: '',
+            probability: '',
+            campaignSource: '',
             customerId: ''
         });
         setIsEditing(false);
@@ -173,7 +188,7 @@ export default function DealsPage() {
                 title: '',
                 description: '',
                 value: '',
-                stage: 'PROSPECTING',
+                stage: 'NEW',
                 priority: 'MEDIUM',
                 expectedCloseDate: '',
                 customerId: ''
@@ -581,11 +596,55 @@ export default function DealsPage() {
                                                 <option key={col.id} value={col.id}>{col.title}</option>
                                             ))}
                                         </select>
-                                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                                            <div className="w-2 h-2 border-r-2 border-b-2 border-gray-400 transform rotate-45 mb-1"></div>
-                                        </div>
                                     </div>
                                 </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Probability (%)</label>
+                                    <input name="probability" type="number" min="0" max="100" value={form.probability} onChange={handleChange} placeholder="50"
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:bg-white focus:border-indigo-500 outline-none transition-all text-gray-900 dark:text-white font-medium" />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Type</label>
+                                    <select name="type" value={form.type} onChange={handleChange}
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:bg-white focus:border-indigo-500 outline-none transition-all text-gray-900 dark:text-white font-medium">
+                                        <option value="NEW_BUSINESS">New Business</option>
+                                        <option value="EXISTING_BUSINESS">Existing Business</option>
+                                        <option value="RENEWAL">Renewal</option>
+                                        <option value="UPSELL">Upsell</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Source</label>
+                                    <select name="leadSource" value={form.leadSource} onChange={handleChange}
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:bg-white focus:border-indigo-500 outline-none transition-all text-gray-900 dark:text-white font-medium">
+                                        <option value="">Select Source</option>
+                                        <option value="WEBSITE">Website</option>
+                                        <option value="REFERRAL">Referral</option>
+                                        <option value="SOCIAL_MEDIA">Social Media</option>
+                                        <option value="EMAIL">Email</option>
+                                        <option value="COLD_CALL">Cold Call</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Next Step</label>
+                                    <input name="nextStep" value={form.nextStep} onChange={handleChange} placeholder="Call to schedule demo"
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:bg-white focus:border-indigo-500 outline-none transition-all text-gray-900 dark:text-white font-medium" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Campaign</label>
+                                    <input name="campaignSource" value={form.campaignSource} onChange={handleChange} placeholder="Summer Sale"
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:bg-white focus:border-indigo-500 outline-none transition-all text-gray-900 dark:text-white font-medium" />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-6">
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Priority</label>
                                     <div className="relative">
@@ -595,9 +654,6 @@ export default function DealsPage() {
                                             <option value="MEDIUM">Medium</option>
                                             <option value="HIGH">High</option>
                                         </select>
-                                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                                            <div className="w-2 h-2 border-r-2 border-b-2 border-gray-400 transform rotate-45 mb-1"></div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -654,6 +710,43 @@ export default function DealsPage() {
                                     <div className="text-right">
                                         <p className="text-sm text-gray-500 uppercase tracking-widest font-semibold mb-1">Value</p>
                                         <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{formatCurrency(viewDeal.value)}</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Deal Info</div>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-500">Type</span>
+                                                <span className="font-medium text-gray-900 dark:text-white">{viewDeal.type?.replace('_', ' ') || '-'}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-500">Source</span>
+                                                <span className="font-medium text-gray-900 dark:text-white">{viewDeal.leadSource?.replace('_', ' ') || '-'}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-500">Campaign</span>
+                                                <span className="font-medium text-gray-900 dark:text-white">{viewDeal.campaignSource || '-'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Pipeline Data</div>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-500">Probability</span>
+                                                <span className="font-medium text-gray-900 dark:text-white">{viewDeal.probability ? `${viewDeal.probability}%` : '-'}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-500">Next Step</span>
+                                                <span className="font-medium text-gray-900 dark:text-white text-right truncate max-w-[120px]" title={viewDeal.nextStep}>{viewDeal.nextStep || '-'}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-500">Priority</span>
+                                                <span className={`font-bold text-xs px-2 py-0.5 rounded ${viewDeal.priority === 'HIGH' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}`}>{viewDeal.priority}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 

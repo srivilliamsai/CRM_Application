@@ -9,6 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -19,7 +20,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_user_email", columnList = "email"),
+        @Index(name = "idx_user_company_id", columnList = "companyId"),
+        @Index(name = "idx_user_enabled", columnList = "enabled")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -52,11 +57,34 @@ public class User {
 
     private boolean enabled = true;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    private java.time.LocalDateTime lastLoginAt;
+
+    private boolean isDeleted = false;
+    private java.time.LocalDateTime deletedAt;
+
+    @Column(updatable = false)
+    private java.time.LocalDateTime createdAt;
+
+    private java.time.LocalDateTime updatedAt;
+
+    private Long createdBy;
+
+    @javax.persistence.PrePersist
+    protected void onCreate() {
+        createdAt = java.time.LocalDateTime.now();
+        updatedAt = java.time.LocalDateTime.now();
+    }
+
+    @javax.persistence.PreUpdate
+    protected void onUpdate() {
+        updatedAt = java.time.LocalDateTime.now();
+    }
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_permissions", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<Permission> permissions = new HashSet<>();
 }

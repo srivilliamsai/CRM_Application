@@ -19,7 +19,9 @@ export default function CampaignsPage() {
     const [simulateData, setSimulateData] = useState({
         sentCount: 0,
         openCount: 0,
-        clickCount: 0
+        clickCount: 0,
+        conversionCount: 0,
+        bounceRate: 0
     });
 
     // Form Data
@@ -122,7 +124,9 @@ export default function CampaignsPage() {
         setSimulateData({
             sentCount: campaign.sentCount || 0,
             openCount: campaign.openCount || 0,
-            clickCount: campaign.clickCount || 0
+            clickCount: campaign.clickCount || 0,
+            conversionCount: campaign.conversionCount || 0,
+            bounceRate: campaign.bounceRate || 0
         });
         setSelectedCampaignId(campaign.id);
         setShowSimulateModal(true);
@@ -184,7 +188,9 @@ export default function CampaignsPage() {
                 ...simulateData,
                 sentCount: parseInt(simulateData.sentCount),
                 openCount: parseInt(simulateData.openCount),
-                clickCount: parseInt(simulateData.clickCount)
+                clickCount: parseInt(simulateData.clickCount),
+                conversionCount: parseInt(simulateData.conversionCount),
+                bounceRate: parseFloat(simulateData.bounceRate)
             };
 
             // The startDate/endDate might come back from API as "2023-01-01T10:00:00". 
@@ -220,6 +226,9 @@ export default function CampaignsPage() {
     const totalClicks = campaigns.reduce((sum, c) => sum + (c.clickCount || 0), 0);
     const openRate = totalSent > 0 ? Math.round((totalOpened / totalSent) * 100) : 0;
 
+    const totalConversions = campaigns.reduce((sum, c) => sum + (c.conversionCount || 0), 0);
+    const avgBounceRate = campaigns.length > 0 ? (campaigns.reduce((sum, c) => sum + (c.bounceRate || 0), 0) / campaigns.length).toFixed(1) : 0;
+
     const typeIcon = (type) => {
         switch (type) {
             case 'EMAIL': return <Mail size={16} />;
@@ -254,11 +263,13 @@ export default function CampaignsPage() {
             </div>
 
             {/* Stats Grid - Operational Metrics */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <StatCard title="Total Campaigns" value={campaigns.length} change={activeCampaigns.length > 0 ? `${activeCampaigns.length} active` : "No active"} icon={<Megaphone size={24} />} color="purple" />
                 <StatCard title="Total Sent" value={totalSent.toLocaleString()} change={campaigns.length > 0 ? `Across ${campaigns.length} campaigns` : "No campaigns"} icon={<Mail size={24} />} color="blue" />
                 <StatCard title="Open Rate" value={`${openRate}%`} change={totalSent > 0 ? `${totalOpened.toLocaleString()} opened` : "No data"} icon={<Eye size={24} />} color="green" />
                 <StatCard title="Total Clicks" value={totalClicks.toLocaleString()} change={totalOpened > 0 ? `${Math.round((totalClicks / totalOpened) * 100)}% click rate` : "No data"} icon={<MousePointer size={24} />} color="pink" />
+                <StatCard title="Conversions" value={totalConversions} change="Total conversions" icon={<Target size={24} />} color="indigo" />
+                <StatCard title="Bounce Rate" value={`${avgBounceRate}%`} change="Avg. bounce rate" icon={<div className="rotate-180"><ArrowUp size={24} /></div>} color="red" />
             </div>
 
             {/* Campaigns */}

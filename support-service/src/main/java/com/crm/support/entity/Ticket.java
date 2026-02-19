@@ -17,13 +17,19 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.Index;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "tickets")
+@Table(name = "tickets", indexes = {
+        @Index(name = "idx_ticket_company_id", columnList = "companyId"),
+        @Index(name = "idx_ticket_status", columnList = "status"),
+        @Index(name = "idx_ticket_assigned_to", columnList = "assignedTo"),
+        @Index(name = "idx_ticket_customer_id", columnList = "customerId")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -65,6 +71,14 @@ public class Ticket {
 
     private LocalDateTime updatedAt;
     private LocalDateTime resolvedAt;
+
+    // SLA fields
+    private LocalDateTime slaDeadline;
+    private Long resolutionTime; // in minutes
+    private LocalDateTime firstResponseTime;
+
+    private boolean isDeleted = false;
+    private LocalDateTime deletedAt;
 
     @PrePersist
     protected void onCreate() {

@@ -12,6 +12,10 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     List<Activity> findByCustomerIdOrderByCreatedAtDesc(Long customerId);
 
+    List<Activity> findByCustomerIdAndCompanyIdOrderByCreatedAtDesc(Long customerId, String companyId);
+
+    List<Activity> findByCompanyIdOrderByCreatedAtDesc(String companyId);
+
     List<Activity> findAllByOrderByCreatedAtDesc();
 
     List<Activity> findByPerformedBy(Long userId);

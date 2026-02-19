@@ -1,7 +1,8 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard, Users, UserPlus, FileText,
-    BarChart2, Settings, HelpCircle, LogOut, Megaphone, Headphones, Calendar
+    BarChart2, Settings, HelpCircle, LogOut, Megaphone, Headphones, Calendar,
+    GitBranch, Puzzle
 } from 'lucide-react';
 import { logout, getUser } from '../services/api';
 
@@ -60,8 +61,8 @@ export default function Sidebar() {
                 <div className="px-3 mt-8 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     System
                 </div>
-                <NavItem to="/dashboard/workflows" icon={<Settings size={20} />} label="Workflows" />
-                <NavItem to="/dashboard/integrations" icon={<Settings size={20} />} label="Integrations" />
+                <NavItem to="/dashboard/workflows" icon={<GitBranch size={20} />} label="Workflows" />
+                <NavItem to="/dashboard/integrations" icon={<Puzzle size={20} />} label="Integrations" />
                 <NavItem to="/dashboard/settings" icon={<Settings size={20} />} label="Settings" />
                 <NavItem to="/dashboard/help" icon={<HelpCircle size={20} />} label="Help & Support" />
             </div>

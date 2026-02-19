@@ -8,7 +8,11 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notifications")
+@Table(name = "notifications", indexes = {
+        @Index(name = "idx_notif_recipient", columnList = "recipientUserId"),
+        @Index(name = "idx_notif_status", columnList = "status"),
+        @Index(name = "idx_notif_ref", columnList = "referenceId")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -46,6 +50,16 @@ public class Notification {
     private LocalDateTime sentAt;
 
     private LocalDateTime readAt;
+
+    private Integer retryCount = 0;
+
+    @Column(columnDefinition = "TEXT")
+    private String errorMessage;
+
+    private boolean isDeleted = false;
+    private LocalDateTime deletedAt;
+
+    private LocalDateTime updatedAt;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;

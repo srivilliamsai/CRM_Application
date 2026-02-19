@@ -72,7 +72,7 @@ public class DashboardService {
 
         List<Map<String, Object>> activities = null;
         try {
-            activities = customerClient.getAllActivities();
+            activities = customerClient.getAllActivities(companyId);
             dashboard.put("totalActivities", activities != null ? activities.size() : 0);
 
             // Get recent 5 activities

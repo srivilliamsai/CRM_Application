@@ -8,7 +8,11 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "workflow_rules")
+@Table(name = "workflow_rules", indexes = {
+        @Index(name = "idx_wf_company_id", columnList = "companyId"),
+        @Index(name = "idx_wf_entity_type", columnList = "entityType"),
+        @Index(name = "idx_wf_active", columnList = "active")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -54,7 +58,8 @@ public class WorkflowRule {
 
     /**
      * JSON action parameters.
-     * e.g. {"assignTo": 5} or {"notificationType": "EMAIL", "template": "high_score_lead"}
+     * e.g. {"assignTo": 5} or {"notificationType": "EMAIL", "template":
+     * "high_score_lead"}
      */
     @Column(columnDefinition = "TEXT")
     private String actionParams;
@@ -69,6 +74,12 @@ public class WorkflowRule {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    private LocalDateTime activeFrom;
+    private LocalDateTime activeTo;
+
+    private boolean isDeleted = false;
+    private LocalDateTime deletedAt;
 
     @PrePersist
     protected void onCreate() {

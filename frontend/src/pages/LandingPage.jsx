@@ -22,10 +22,7 @@ export default function LandingPage() {
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                     <motion.div initial="initial" animate="animate" variants={fadeInUp}>
-                        <div className="inline-flex items-center gap-2 py-1 px-4 rounded-full bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-gray-800 backdrop-blur-sm mb-8 shadow-sm">
-                            <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">v2.0 is now live</span>
-                        </div>
+
 
                         <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8 pb-4 bg-clip-text text-transparent bg-gradient-to-b from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
                             CRM re-imagined <br /> for growth.
@@ -49,23 +46,7 @@ export default function LandingPage() {
                         </div>
                     </motion.div>
 
-                    {/* Dashboard Preview */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3, duration: 0.8 }}
-                        className="relative mx-auto max-w-6xl"
-                    >
-                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl blur opacity-20 dark:opacity-40"></div>
-                        <div className="relative glass-card p-2 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-card">
-                            <img
-                                src="https://placehold.co/2400x1500/png?text=Dashboard+UI&font=inter"
-                                // In production, replace with real screenshot
-                                alt="Dashboard Preview"
-                                className="rounded-2xl shadow-inner w-full border border-gray-100 dark:border-gray-800"
-                            />
-                        </div>
-                    </motion.div>
+
                 </div>
             </section>
 

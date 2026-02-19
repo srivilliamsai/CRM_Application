@@ -3,7 +3,14 @@ import { getAllLeads, createLead, updateLead, deleteLead, createCustomer, update
 import { Plus, Search, Filter, MoreVertical, Phone, Mail, X, Edit, Trash2, UserCheck, Eye, Clock, FileText, Activity, Upload, LayoutGrid, List, User, CheckSquare, Calendar, Star, Flame } from 'lucide-react';
 import ImportWizard from '../../components/leads/ImportWizard';
 
-const INITIAL_FORM = { name: '', email: '', phone: '', company: '', source: '', status: 'NEW', score: 0, notes: '', assignedTo: '' };
+const INITIAL_FORM = {
+    firstName: '', lastName: '', title: '',
+    email: '', phone: '', company: '', source: '',
+    status: 'NEW', score: 0, notes: '', assignedTo: '',
+    website: '', industry: '', annualRevenue: '', numberOfEmployees: '', rating: '',
+    street: '', city: '', state: '', zipCode: '', country: '',
+    linkedinUrl: '', twitterHandle: ''
+};
 const INITIAL_CONVERT_FORM = { firstName: '', lastName: '', email: '', phone: '', company: '', status: 'ACTIVE', source: '' };
 
 export default function LeadsPage() {
@@ -119,7 +126,7 @@ export default function LeadsPage() {
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
             result = result.filter(l =>
-                (l.name && l.name.toLowerCase().includes(query)) ||
+                ((l.firstName && l.firstName.toLowerCase().includes(query)) || (l.lastName && l.lastName.toLowerCase().includes(query))) ||
                 (l.email && l.email.toLowerCase().includes(query)) ||
                 (l.company && l.company.toLowerCase().includes(query))
             );
@@ -189,7 +196,23 @@ export default function LeadsPage() {
     };
 
     const openEditModal = (lead) => {
-        setForm(lead);
+        setForm({
+            ...lead,
+            firstName: lead.firstName || '',
+            lastName: lead.lastName || '',
+            // Ensure all fields are present to avoid uncontrolled inputs
+            title: lead.title || '',
+            website: lead.website || '',
+            industry: lead.industry || '',
+            rating: lead.rating || '',
+            street: lead.street || '',
+            city: lead.city || '',
+            state: lead.state || '',
+            zipCode: lead.zipCode || '',
+            country: lead.country || '',
+            linkedinUrl: lead.linkedinUrl || '',
+            twitterHandle: lead.twitterHandle || ''
+        });
         setIsEditing(true);
         setSelectedLeadId(lead.id);
         setError('');
@@ -198,10 +221,8 @@ export default function LeadsPage() {
     };
 
     const openConvertModal = (lead) => {
-        // Split name into First/Last
-        const nameParts = lead.name ? lead.name.split(' ') : [''];
-        const firstName = nameParts[0] || '';
-        const lastName = nameParts.slice(1).join(' ') || '';
+        const firstName = lead.firstName || '';
+        const lastName = lead.lastName || '';
 
         setConvertForm({
             firstName,
@@ -238,20 +259,17 @@ export default function LeadsPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.name.trim()) { setError('Lead name is required'); return; }
+        if (!form.firstName.trim() || !form.lastName.trim()) { setError('First and Last name are required'); return; }
         setError('');
         setSaving(true);
         try {
             // Prepare clean payload (remove extra fields like createdAt, id, etc.)
+            // Prepare clean payload
             const payload = {
-                name: form.name,
-                email: form.email,
-                phone: form.phone,
-                company: form.company,
-                source: form.source,
-                status: form.status,
-                score: form.score,
-                notes: form.notes,
+                ...form,
+                score: parseInt(form.score) || 0,
+                annualRevenue: form.annualRevenue ? parseFloat(form.annualRevenue) : null,
+                numberOfEmployees: form.numberOfEmployees ? parseInt(form.numberOfEmployees) : null,
                 assignedTo: form.assignedTo || user.id
             };
 
@@ -407,23 +425,24 @@ export default function LeadsPage() {
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-3">
                                                         <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
-                                                            {lead.name?.charAt(0) || '?'}
+                                                            {lead.firstName?.charAt(0) || '?'}
                                                         </div>
                                                         <div>
-                                                            <div className="font-medium text-gray-900 dark:text-white">{lead.name}</div>
+                                                            <div className="font-medium text-gray-900 dark:text-white">{lead.firstName} {lead.lastName}</div>
+                                                            <div className="text-xs text-gray-500">{lead.title}</div>
                                                             <div className="text-xs text-gray-500">{lead.email}</div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{lead.company || '—'}</td>
                                                 <td className="px-6 py-4">
-                                                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${lead.status === 'NEW' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
-                                                        lead.status === 'QUALIFIED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
-                                                            lead.status === 'CONTACTED' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300' :
-                                                                lead.status === 'CONVERTED' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' :
+                                                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${lead.isConverted || lead.status === 'CONVERTED' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' :
+                                                        lead.status === 'NEW' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                                                            lead.status === 'QUALIFIED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
+                                                                lead.status === 'CONTACTED' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300' :
                                                                     'bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-300'
                                                         }`}>
-                                                        {lead.status}
+                                                        {lead.isConverted ? 'CONVERTED' : lead.status}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -480,7 +499,7 @@ export default function LeadsPage() {
                     <button onClick={() => openEditModal(leads.find(l => l.id === activeDropdown))} className="w-full text-left px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10 flex items-center gap-2">
                         <Edit size={16} /> Edit Lead
                     </button>
-                    {leads.find(l => l.id === activeDropdown)?.status !== 'CONVERTED' && (
+                    {(!leads.find(l => l.id === activeDropdown)?.isConverted && leads.find(l => l.id === activeDropdown)?.status !== 'CONVERTED') && (
                         <button onClick={() => openConvertModal(leads.find(l => l.id === activeDropdown))} className="w-full text-left px-4 py-2.5 text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/10 flex items-center gap-2">
                             <UserCheck size={16} /> Convert to Customer
                         </button>
@@ -500,11 +519,11 @@ export default function LeadsPage() {
                         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
                             <div className="flex items-center gap-4">
                                 <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl font-bold">
-                                    {viewLead.name?.charAt(0) || '?'}
+                                    {viewLead.firstName?.charAt(0) || '?'}
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">{viewLead.name}</h2>
-                                    <p className="text-sm text-gray-500">{viewLead.email}</p>
+                                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">{viewLead.firstName} {viewLead.lastName}</h2>
+                                    <p className="text-sm text-gray-500">{viewLead.title} • {viewLead.email}</p>
                                 </div>
                             </div>
                             <button onClick={() => setShowViewModal(false)} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
@@ -628,40 +647,118 @@ export default function LeadsPage() {
                                 </div>
                             )}
 
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name *</label>
+                                    <input name="firstName" value={form.firstName} onChange={handleChange} required
+                                        className="input-field"
+                                        placeholder="John" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name *</label>
+                                    <input name="lastName" value={form.lastName} onChange={handleChange} required
+                                        className="input-field"
+                                        placeholder="Doe" />
+                                </div>
+                            </div>
+
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label>
-                                <input name="name" value={form.name} onChange={handleChange} required
-                                    className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white"
-                                    placeholder="e.g. John Smith" />
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Title</label>
+                                <input name="title" value={form.title} onChange={handleChange}
+                                    className="input-field"
+                                    placeholder="CEO" />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
                                     <input name="email" type="email" value={form.email} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white"
+                                        className="input-field"
                                         placeholder="john@example.com" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
                                     <input name="phone" value={form.phone} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white"
+                                        className="input-field"
                                         placeholder="+1 234 567 890" />
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
-                                <input name="company" value={form.company} onChange={handleChange}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white"
-                                    placeholder="Acme Inc." />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
+                                    <input name="company" value={form.company} onChange={handleChange}
+                                        className="input-field"
+                                        placeholder="Acme Inc." />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Website</label>
+                                    <input name="website" value={form.website} onChange={handleChange}
+                                        className="input-field"
+                                        placeholder="https://acme.com" />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Industry</label>
+                                    <input name="industry" value={form.industry} onChange={handleChange}
+                                        className="input-field"
+                                        placeholder="Tech" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Annual Revenue</label>
+                                    <input name="annualRevenue" type="number" value={form.annualRevenue} onChange={handleChange}
+                                        className="input-field"
+                                        placeholder="Revenue" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Employees</label>
+                                    <input name="numberOfEmployees" type="number" value={form.numberOfEmployees} onChange={handleChange}
+                                        className="input-field"
+                                        placeholder="Count" />
+                                </div>
+                            </div>
+
+                            {/* Address */}
+                            <div className="space-y-3 pt-2">
+                                <h3 className="text-sm font-medium text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-1">Address</h3>
+                                <div>
+                                    <input name="street" value={form.street} onChange={handleChange}
+                                        className="input-field mb-3"
+                                        placeholder="Street Address" />
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <input name="city" value={form.city} onChange={handleChange} placeholder="City" className="input-field" />
+                                        <input name="state" value={form.state} onChange={handleChange} placeholder="State" className="input-field" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3 mt-3">
+                                        <input name="zipCode" value={form.zipCode} onChange={handleChange} placeholder="Zip Code" className="input-field" />
+                                        <input name="country" value={form.country} onChange={handleChange} placeholder="Country" className="input-field" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Social */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">LinkedIn</label>
+                                    <input name="linkedinUrl" value={form.linkedinUrl} onChange={handleChange}
+                                        className="input-field"
+                                        placeholder="LinkedIn URL" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Twitter</label>
+                                    <input name="twitterHandle" value={form.twitterHandle} onChange={handleChange}
+                                        className="input-field"
+                                        placeholder="@handle" />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Source</label>
                                     <select name="source" value={form.source} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white">
+                                        className="input-field">
                                         <option value="">Select source</option>
                                         <option value="WEBSITE">Website</option>
                                         <option value="REFERRAL">Referral</option>
@@ -674,7 +771,7 @@ export default function LeadsPage() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
                                     <select name="status" value={form.status} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white">
+                                        className="input-field">
                                         <option value="NEW">New</option>
                                         <option value="CONTACTED">Contacted</option>
                                         <option value="QUALIFIED">Qualified</option>
@@ -686,10 +783,22 @@ export default function LeadsPage() {
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Score (0–100)</label>
-                                <input name="score" type="number" min="0" max="100" value={form.score} onChange={handleChange}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white" />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rating</label>
+                                    <select name="rating" value={form.rating} onChange={handleChange}
+                                        className="input-field">
+                                        <option value="">Select Rating</option>
+                                        <option value="HOT">Hot</option>
+                                        <option value="WARM">Warm</option>
+                                        <option value="COLD">Cold</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Score (0–100)</label>
+                                    <input name="score" type="number" min="0" max="100" value={form.score} onChange={handleChange}
+                                        className="input-field" />
+                                </div>
                             </div>
 
                             {/* Assignment Section */}

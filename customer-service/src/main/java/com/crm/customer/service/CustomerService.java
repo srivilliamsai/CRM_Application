@@ -107,7 +107,29 @@ public class CustomerService {
         customer.setSource(dto.getSource());
 
         if (dto.getStatus() != null) {
-            customer.setStatus(Customer.CustomerStatus.valueOf(dto.getStatus().toUpperCase()));
+            try {
+                customer.setStatus(Customer.CustomerStatus.valueOf(dto.getStatus().toUpperCase()));
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+
+        customer.setWebsite(dto.getWebsite());
+        customer.setIndustry(dto.getIndustry());
+        customer.setAnnualRevenue(dto.getAnnualRevenue());
+        customer.setZipCode(dto.getZipCode());
+        customer.setBillingStreet(dto.getBillingStreet());
+        customer.setBillingCity(dto.getBillingCity());
+        customer.setBillingState(dto.getBillingState());
+        customer.setBillingZipCode(dto.getBillingZipCode());
+        customer.setBillingCountry(dto.getBillingCountry());
+
+        if (dto.getRating() != null && !dto.getRating().isEmpty()) {
+            try {
+                customer.setRating(Customer.CustomerRating.valueOf(dto.getRating().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // Ignore
+            }
         }
 
         if (dto.getCompanyId() != null) {

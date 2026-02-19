@@ -44,9 +44,14 @@ public class AnalyticsController {
      * GET /api/analytics/reports
      * Returns all saved reports.
      */
+    /**
+     * GET /api/analytics/reports
+     * Returns all saved reports for the specific company.
+     */
     @GetMapping("/reports")
-    public ResponseEntity<List<Report>> getAllReports() {
-        return ResponseEntity.ok(reportRepository.findAll());
+    public ResponseEntity<List<Report>> getAllReports(
+            @org.springframework.web.bind.annotation.RequestParam("companyId") String companyId) {
+        return ResponseEntity.ok(reportRepository.findByCompanyId(companyId));
     }
 
     @GetMapping("/reports/{id}")

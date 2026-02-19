@@ -10,7 +10,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "deals")
+@Table(name = "deals", indexes = {
+        @Index(name = "idx_deal_company_id", columnList = "companyId"),
+        @Index(name = "idx_deal_stage", columnList = "stage"),
+        @Index(name = "idx_deal_assigned_to", columnList = "assignedTo")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,7 +34,7 @@ public class Deal {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 30)
-    private DealStage stage = DealStage.PROSPECTING;
+    private DealStage stage = DealStage.NEW;
 
     private Long customerId; // from customer-service
 
@@ -43,6 +47,31 @@ public class Deal {
     private String priority; // LOW, MEDIUM, HIGH
 
     private LocalDate expectedCloseDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private DealType type; // New Business, Existing Business
+
+    @Column(length = 50)
+    private String leadSource;
+
+    @Column(length = 255)
+    private String nextStep;
+
+    private Integer probability; // 0-100%
+
+    @Column(length = 36)
+    private String campaignSource; // Campaign ID
+
+    @Column(length = 100)
+    private String pipelineName;
+
+    private Integer pipelineOrder;
+
+    private boolean isDeleted = false;
+    private LocalDateTime deletedAt;
+
+    private Long createdBy;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -61,6 +90,10 @@ public class Deal {
     }
 
     public enum DealStage {
-        PROSPECTING, QUALIFICATION, PROPOSAL, NEGOTIATION, CLOSED_WON, CLOSED_LOST
+        NEW, QUALIFIED, PROPOSAL, NEGOTIATION, CLOSED_WON, CLOSED_LOST
+    }
+
+    public enum DealType {
+        NEW_BUSINESS, EXISTING_BUSINESS
     }
 }

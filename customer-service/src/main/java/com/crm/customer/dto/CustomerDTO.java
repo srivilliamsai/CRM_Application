@@ -1,5 +1,7 @@
 package com.crm.customer.dto;
 
+import java.math.BigDecimal;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
@@ -30,4 +32,17 @@ public class CustomerDTO {
     private String country;
     private String status;
     private String source;
+
+    private String website;
+    private String industry;
+    private BigDecimal annualRevenue;
+    private String rating; // Enum as String
+    private String zipCode;
+
+    // Billing Address
+    private String billingStreet;
+    private String billingCity;
+    private String billingState;
+    private String billingZipCode;
+    private String billingCountry;
 }

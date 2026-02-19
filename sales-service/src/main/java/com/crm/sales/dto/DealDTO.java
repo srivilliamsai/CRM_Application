@@ -22,4 +22,10 @@ public class DealDTO {
     private String companyId;
     private String priority;
     private LocalDate expectedCloseDate;
+
+    private String type; // Enum
+    private String leadSource;
+    private String nextStep;
+    private Integer probability;
+    private String campaignSource;
 }

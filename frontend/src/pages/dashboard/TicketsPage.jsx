@@ -173,6 +173,7 @@ export default function TicketsPage() {
                                     <th className="py-4">Customer</th>
                                     <th className="py-4">Priority</th>
                                     <th className="py-4">Status</th>
+                                    <th className="py-4">SLA Deadline</th>
                                     <th className="py-4">Created</th>
                                     <th className="py-4 pr-6 text-right">Action</th>
                                 </tr>
@@ -215,6 +216,13 @@ export default function TicketsPage() {
                                                     }`}>
                                                     {ticket.status.replace('_', ' ')}
                                                 </span>
+                                            </td>
+                                            <td className="py-4">
+                                                {ticket.slaDeadline ? (
+                                                    <span className={`text-xs font-medium ${new Date(ticket.slaDeadline) < new Date() && ticket.status !== 'RESOLVED' && ticket.status !== 'CLOSED' ? 'text-red-600 font-bold' : 'text-gray-500'}`}>
+                                                        {new Date(ticket.slaDeadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                ) : <span className="text-gray-400 text-xs">-</span>}
                                             </td>
                                             <td className="py-4 text-gray-500 font-medium">
                                                 {new Date(ticket.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}

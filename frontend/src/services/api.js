@@ -252,17 +252,20 @@ export const deleteNote = async (id) => {
 // ============ Activities (customer-service) ============
 
 export const getAllActivities = async () => {
-    const response = await CUSTOMER_API.get('/activities');
+    const companyId = getCompanyId();
+    const response = await CUSTOMER_API.get(`/activities?companyId=${companyId}`);
     return response.data;
 };
 
 export const getActivitiesByCustomer = async (customerId) => {
-    const response = await CUSTOMER_API.get(`/activities/customer/${customerId}`);
+    const companyId = getCompanyId();
+    const response = await CUSTOMER_API.get(`/activities/customer/${customerId}?companyId=${companyId}`);
     return response.data;
 };
 
 export const createActivity = async (data) => {
-    const response = await CUSTOMER_API.post('/activities', data);
+    const companyId = getCompanyId();
+    const response = await CUSTOMER_API.post('/activities', { ...data, companyId });
     return response.data;
 };
 
@@ -425,12 +428,14 @@ export const getDashboardAnalytics = async () => {
 };
 
 export const getAllReports = async () => {
-    const response = await ANALYTICS_API.get('/analytics/reports');
+    const companyId = getCompanyId();
+    const response = await ANALYTICS_API.get(`/analytics/reports?companyId=${companyId}`);
     return response.data;
 };
 
 export const createReport = async (data) => {
-    const response = await ANALYTICS_API.post('/analytics/reports', data);
+    const companyId = getCompanyId();
+    const response = await ANALYTICS_API.post('/analytics/reports', { ...data, companyId });
     return response.data;
 };
 

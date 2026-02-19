@@ -35,7 +35,8 @@ public class LeadService {
 
         // Notify if assigned
         if (savedLead.getAssignedTo() != null) {
-            sendAssignmentNotification(savedLead.getAssignedTo(), "Lead", savedLead.getId(), savedLead.getName(),
+            sendAssignmentNotification(savedLead.getAssignedTo(), "Lead", savedLead.getId(),
+                    savedLead.getFirstName() + " " + savedLead.getLastName(),
                     dto.getCompanyId());
         }
 
@@ -96,7 +97,8 @@ public class LeadService {
         if (dto.getAssignedTo() != null && !dto.getAssignedTo().equals(oldAssignee)) {
             System.out.println("Triggering notification for Lead assignment. New: " + dto.getAssignedTo() + ", Old: "
                     + oldAssignee);
-            sendAssignmentNotification(dto.getAssignedTo(), "Lead", savedLead.getId(), savedLead.getName(),
+            sendAssignmentNotification(dto.getAssignedTo(), "Lead", savedLead.getId(),
+                    savedLead.getFirstName() + " " + savedLead.getLastName(),
                     lead.getCompanyId());
         } else {
             System.out.println("No notification triggered. New: " + dto.getAssignedTo() + ", Old: " + oldAssignee);
@@ -128,7 +130,9 @@ public class LeadService {
     // ========== Helper ==========
 
     private void mapDtoToEntity(LeadDTO dto, Lead lead) {
-        lead.setName(dto.getName());
+        lead.setFirstName(dto.getFirstName());
+        lead.setLastName(dto.getLastName());
+        lead.setTitle(dto.getTitle());
         lead.setEmail(dto.getEmail());
         lead.setPhone(dto.getPhone());
         lead.setCompany(dto.getCompany());
@@ -136,8 +140,32 @@ public class LeadService {
         lead.setNotes(dto.getNotes());
         lead.setAssignedTo(dto.getAssignedTo());
 
+        lead.setWebsite(dto.getWebsite());
+        lead.setIndustry(dto.getIndustry());
+        lead.setAnnualRevenue(dto.getAnnualRevenue());
+        lead.setNumberOfEmployees(dto.getNumberOfEmployees());
+        lead.setStreet(dto.getStreet());
+        lead.setCity(dto.getCity());
+        lead.setState(dto.getState());
+        lead.setZipCode(dto.getZipCode());
+        lead.setCountry(dto.getCountry());
+        lead.setLinkedinUrl(dto.getLinkedinUrl());
+        lead.setTwitterHandle(dto.getTwitterHandle());
+
+        if (dto.getRating() != null && !dto.getRating().isEmpty()) {
+            try {
+                lead.setRating(Lead.LeadRating.valueOf(dto.getRating().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid rating or handle gracefully
+            }
+        }
+
         if (dto.getStatus() != null) {
-            lead.setStatus(Lead.LeadStatus.valueOf(dto.getStatus().toUpperCase()));
+            try {
+                lead.setStatus(Lead.LeadStatus.valueOf(dto.getStatus().toUpperCase()));
+            } catch (Exception e) {
+                // Ignore
+            }
         }
         if (dto.getScore() != null) {
             lead.setScore(dto.getScore());

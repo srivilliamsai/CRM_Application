@@ -6,7 +6,14 @@ export default function CustomersPage() {
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', company: '', jobTitle: '', address: '', city: '', state: '', country: '', status: 'ACTIVE', source: '', assignedTo: '' });
+    const [form, setForm] = useState({
+        firstName: '', lastName: '',
+        email: '', phone: '', company: '', jobTitle: '',
+        website: '', industry: '', annualRevenue: '', rating: '',
+        address: '', city: '', state: '', zipCode: '', country: '',
+        billingStreet: '', billingCity: '', billingState: '', billingZipCode: '', billingCountry: '',
+        status: 'ACTIVE', source: '', assignedTo: ''
+    });
     const [isEditing, setIsEditing] = useState(false);
     const [selectedCustomerId, setSelectedCustomerId] = useState(null);
     const [saving, setSaving] = useState(false);
@@ -142,17 +149,27 @@ export default function CustomersPage() {
 
     const openEditModal = (customer) => {
         setForm({
+            ...customer,
             firstName: customer.firstName || '',
             lastName: customer.lastName || '',
             email: customer.email || '',
             phone: customer.phone || '',
             company: customer.company || '',
             jobTitle: customer.jobTitle || '',
+            website: customer.website || '',
+            industry: customer.industry || '',
+            annualRevenue: customer.annualRevenue || '',
+            rating: customer.rating || '',
             address: customer.address || '',
             city: customer.city || '',
             state: customer.state || '',
+            zipCode: customer.zipCode || '',
             country: customer.country || '',
-            status: customer.status || 'ACTIVE',
+            billingStreet: customer.billingStreet || '',
+            billingCity: customer.billingCity || '',
+            billingState: customer.billingState || '',
+            billingZipCode: customer.billingZipCode || '',
+            billingCountry: customer.billingCountry || '',
             status: customer.status || 'ACTIVE',
             source: customer.source || '',
             assignedTo: customer.assignedTo || ''
@@ -211,7 +228,14 @@ export default function CustomersPage() {
     };
 
     const openCreateModal = () => {
-        setForm({ firstName: '', lastName: '', email: '', phone: '', company: '', jobTitle: '', address: '', city: '', state: '', country: '', status: 'ACTIVE', source: '', assignedTo: '' });
+        setForm({
+            firstName: '', lastName: '',
+            email: '', phone: '', company: '', jobTitle: '',
+            website: '', industry: '', annualRevenue: '', rating: '',
+            address: '', city: '', state: '', zipCode: '', country: '',
+            billingStreet: '', billingCity: '', billingState: '', billingZipCode: '', billingCountry: '',
+            status: 'ACTIVE', source: '', assignedTo: ''
+        });
         setIsEditing(false);
         setSelectedCustomerId(null);
         setError('');
@@ -223,10 +247,16 @@ export default function CustomersPage() {
         setSaving(true);
         setError('');
         try {
+            const payload = {
+                ...form,
+                annualRevenue: form.annualRevenue ? parseFloat(form.annualRevenue) : null,
+                assignedTo: form.assignedTo || user.id
+            };
+
             if (isEditing) {
-                await updateCustomer(selectedCustomerId, { ...form, assignedTo: form.assignedTo || user.id });
+                await updateCustomer(selectedCustomerId, payload);
             } else {
-                await createCustomer({ ...form, assignedTo: form.assignedTo || user.id });
+                await createCustomer(payload);
             }
             setShowModal(false);
             fetchCustomers();
@@ -363,25 +393,31 @@ export default function CustomersPage() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name *</label>
                                     <input name="firstName" value={form.firstName} onChange={handleChange} required
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white" />
+                                        className="input-field" placeholder="John" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name</label>
-                                    <input name="lastName" value={form.lastName} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white" />
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name *</label>
+                                    <input name="lastName" value={form.lastName} onChange={handleChange} required
+                                        className="input-field" placeholder="Doe" />
                                 </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Title</label>
+                                <input name="jobTitle" value={form.jobTitle} onChange={handleChange}
+                                    className="input-field" placeholder="CEO" />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
                                     <input name="email" type="email" value={form.email} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white" />
+                                        className="input-field" placeholder="john@example.com" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
                                     <input name="phone" value={form.phone} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white" />
+                                        className="input-field" placeholder="+1 234 567 890" />
                                 </div>
                             </div>
 
@@ -389,36 +425,69 @@ export default function CustomersPage() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
                                     <input name="company" value={form.company} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white" />
+                                        className="input-field" placeholder="Acme Inc." />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Title</label>
-                                    <input name="jobTitle" value={form.jobTitle} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white" />
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Website</label>
+                                    <input name="website" value={form.website} onChange={handleChange}
+                                        className="input-field" placeholder="https://acme.com" />
                                 </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
-                                <input name="address" value={form.address} onChange={handleChange}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white" />
                             </div>
 
                             <div className="grid grid-cols-3 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">City</label>
-                                    <input name="city" value={form.city} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white" />
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Industry</label>
+                                    <input name="industry" value={form.industry} onChange={handleChange}
+                                        className="input-field" placeholder="Tech" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">State</label>
-                                    <input name="state" value={form.state} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white" />
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Revenue</label>
+                                    <input name="annualRevenue" type="number" value={form.annualRevenue} onChange={handleChange}
+                                        className="input-field" placeholder="1000000" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Country</label>
-                                    <input name="country" value={form.country} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white" />
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rating</label>
+                                    <select name="rating" value={form.rating} onChange={handleChange}
+                                        className="input-field">
+                                        <option value="">Select</option>
+                                        <option value="HOT">Hot</option>
+                                        <option value="WARM">Warm</option>
+                                        <option value="COLD">Cold</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Main Address */}
+                            <div className="space-y-3 pt-2">
+                                <h3 className="text-sm font-medium text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-1">Primary Address</h3>
+                                <div>
+                                    <input name="address" value={form.address} onChange={handleChange}
+                                        className="input-field mb-3" placeholder="Street Address" />
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <input name="city" value={form.city} onChange={handleChange} placeholder="City" className="input-field" />
+                                        <input name="state" value={form.state} onChange={handleChange} placeholder="State" className="input-field" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3 mt-3">
+                                        <input name="zipCode" value={form.zipCode} onChange={handleChange} placeholder="Zip Code" className="input-field" />
+                                        <input name="country" value={form.country} onChange={handleChange} placeholder="Country" className="input-field" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Billing Address */}
+                            <div className="space-y-3 pt-2">
+                                <h3 className="text-sm font-medium text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-1">Billing Address</h3>
+                                <div>
+                                    <input name="billingStreet" value={form.billingStreet} onChange={handleChange}
+                                        className="input-field mb-3" placeholder="Billing Street" />
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <input name="billingCity" value={form.billingCity} onChange={handleChange} placeholder="City" className="input-field" />
+                                        <input name="billingState" value={form.billingState} onChange={handleChange} placeholder="State" className="input-field" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3 mt-3">
+                                        <input name="billingZipCode" value={form.billingZipCode} onChange={handleChange} placeholder="Zip Code" className="input-field" />
+                                        <input name="billingCountry" value={form.billingCountry} onChange={handleChange} placeholder="Country" className="input-field" />
+                                    </div>
                                 </div>
                             </div>
 
@@ -426,15 +495,16 @@ export default function CustomersPage() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
                                     <select name="status" value={form.status} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white">
+                                        className="input-field">
                                         <option value="ACTIVE">Active</option>
                                         <option value="INACTIVE">Inactive</option>
+                                        <option value="PROSPECT">Prospect</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Source</label>
                                     <select name="source" value={form.source} onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 dark:text-white">
+                                        className="input-field">
                                         <option value="">Select source</option>
                                         <option value="WEBSITE">Website</option>
                                         <option value="REFERRAL">Referral</option>
@@ -617,22 +687,49 @@ export default function CustomersPage() {
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Professional</label>
-                                            <div className="text-gray-700 dark:text-gray-300">
-                                                <span className="block font-medium">{viewCustomer.jobTitle || 'No Job Title'}</span>
-                                                <span className="text-sm text-gray-500">{viewCustomer.company}</span>
+                                            <div className="text-gray-700 dark:text-gray-300 space-y-1">
+                                                <div className="block font-medium">{viewCustomer.jobTitle || 'No Job Title'}</div>
+                                                <div className="text-sm text-gray-500">{viewCustomer.company}</div>
+                                                {viewCustomer.website && (
+                                                    <a href={viewCustomer.website} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline block truncate">
+                                                        {viewCustomer.website}
+                                                    </a>
+                                                )}
+                                                <div className="text-sm text-gray-500 flex gap-2">
+                                                    <span>{viewCustomer.industry}</span>
+                                                    {viewCustomer.annualRevenue && <span>• ${parseFloat(viewCustomer.annualRevenue).toLocaleString()}</span>}
+                                                </div>
+                                                {viewCustomer.rating && (
+                                                    <div className="text-xs font-bold px-2 py-0.5 rounded bg-orange-100 text-orange-700 w-fit">
+                                                        {viewCustomer.rating}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Location</label>
-                                        <div className="flex items-start gap-2 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
-                                            <MapPin size={18} className="text-gray-400 mt-0.5" />
-                                            <div>
-                                                <p>{viewCustomer.address || 'No street address'}</p>
-                                                <p className="text-gray-500">
-                                                    {[viewCustomer.city, viewCustomer.state, viewCustomer.country].filter(Boolean).join(', ') || 'No location details'}
-                                                </p>
+                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Addresses</label>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="flex items-start gap-2 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                <MapPin size={18} className="text-gray-400 mt-0.5" />
+                                                <div>
+                                                    <p className="text-xs font-bold text-gray-500 mb-1">PRIMARY</p>
+                                                    <p>{viewCustomer.address || 'No street address'}</p>
+                                                    <p className="text-gray-500">
+                                                        {[viewCustomer.city, viewCustomer.state, viewCustomer.zipCode, viewCustomer.country].filter(Boolean).join(', ') || 'No location details'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-2 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                <DollarSign size={18} className="text-gray-400 mt-0.5" />
+                                                <div>
+                                                    <p className="text-xs font-bold text-gray-500 mb-1">BILLING</p>
+                                                    <p>{viewCustomer.billingStreet || 'Same as primary'}</p>
+                                                    <p className="text-gray-500">
+                                                        {[viewCustomer.billingCity, viewCustomer.billingState, viewCustomer.billingZipCode, viewCustomer.billingCountry].filter(Boolean).join(', ')}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
