@@ -9,7 +9,8 @@ export default function ImportWizard({ onClose, onComplete }) {
     const [csvData, setCsvData] = useState([]);
     const [headers, setHeaders] = useState([]);
     const [mapping, setMapping] = useState({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         phone: '',
         company: ''
@@ -23,7 +24,8 @@ export default function ImportWizard({ onClose, onComplete }) {
 
     // CRM Fields to map to
     const crmFields = [
-        { key: 'name', label: 'Full Name', required: true },
+        { key: 'firstName', label: 'First Name', required: true },
+        { key: 'lastName', label: 'Last Name', required: true },
         { key: 'email', label: 'Email', required: false },
         { key: 'phone', label: 'Phone', required: false },
         { key: 'company', label: 'Company', required: false },
@@ -75,7 +77,8 @@ export default function ImportWizard({ onClose, onComplete }) {
         for (const row of csvData) {
             try {
                 const leadData = {
-                    name: row[mapping.name],
+                    firstName: row[mapping.firstName],
+                    lastName: row[mapping.lastName],
                     email: mapping.email ? row[mapping.email] : '',
                     phone: mapping.phone ? row[mapping.phone] : '',
                     company: mapping.company ? row[mapping.company] : '',
@@ -86,8 +89,8 @@ export default function ImportWizard({ onClose, onComplete }) {
                 };
 
                 // Basic validation
-                if (!leadData.name) {
-                    throw new Error("Missing Name");
+                if (!leadData.firstName || !leadData.lastName) {
+                    throw new Error("Missing First or Last Name");
                 }
 
                 await createLead(leadData);
@@ -319,7 +322,7 @@ export default function ImportWizard({ onClose, onComplete }) {
                             </button>
                             <button
                                 onClick={() => setStep(3)}
-                                disabled={!mapping.name}
+                                disabled={!mapping.firstName || !mapping.lastName}
                                 className="btn-primary px-6 py-2.5 flex items-center gap-2 disabled:opacity-50"
                             >
                                 Next <ArrowRight size={16} />

@@ -22,6 +22,9 @@ public class WorkflowRule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 36)
+    private String companyId;
+
     @Column(nullable = false, length = 200)
     private String name;
 

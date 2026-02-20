@@ -11,16 +11,11 @@ import com.crm.auth.repository.RoleRepository;
  * Seeds default roles into the database on first startup.
  */
 @Component
+@org.springframework.transaction.annotation.Transactional
 public class DataSeeder implements CommandLineRunner {
 
     @Autowired
     private RoleRepository roleRepository;
-
-    @Autowired
-    private com.crm.auth.repository.UserRepository userRepository;
-
-    @Autowired
-    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     @Autowired
     private com.crm.auth.repository.PermissionRepository permissionRepository;
@@ -92,23 +87,7 @@ public class DataSeeder implements CommandLineRunner {
             System.out.println("Seeded/Updated role: " + roleName);
         }
 
-        // Seed Default Admin
-        if (!userRepository.existsByUsername("admin")) {
-            com.crm.auth.entity.User admin = new com.crm.auth.entity.User();
-            admin.setUsername("admin");
-            admin.setEmail("admin@uniq.com");
-            admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setFullName("System Administrator");
-
-            Role adminRole = roleRepository.findByName(Role.RoleName.ROLE_ADMIN)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            java.util.Set<Role> roles = new java.util.HashSet<>();
-            roles.add(adminRole);
-            admin.setRoles(roles);
-
-            userRepository.save(admin);
-            System.out.println("Seeded default admin: admin / admin123");
-        }
+        // Default Admin seeding removed as per request
     }
 
     private void addPermission(java.util.Set<com.crm.auth.entity.Permission> set, String name) {

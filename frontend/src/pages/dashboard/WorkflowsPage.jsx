@@ -10,7 +10,14 @@ export default function WorkflowsPage() {
     const [activeTab, setActiveTab] = useState('rules'); // rules, logs
 
     // Form state
-    const [newRule, setNewRule] = useState({ name: '', triggerType: 'EVENT', condition: '', actionType: 'EMAIL', actionConfig: '' });
+    const [newRule, setNewRule] = useState({
+        name: '',
+        entityType: 'LEAD', // Default
+        triggerType: 'CREATED',
+        condition: '',
+        actionType: 'SEND_NOTIFICATION',
+        actionConfig: ''
+    });
 
     const fetchData = async () => {
         setLoading(true);
@@ -55,12 +62,31 @@ export default function WorkflowsPage() {
     const handleCreateRule = async (e) => {
         e.preventDefault();
         try {
-            await createRule(newRule);
+            // Map frontend state to backend entity structure
+            const payload = {
+                name: newRule.name,
+                entityType: newRule.entityType,
+                triggerEvent: newRule.triggerType,
+                conditionExpression: newRule.condition,
+                actionType: newRule.actionType,
+                actionParams: newRule.actionConfig,
+                active: true
+            };
+
+            await createRule(payload);
             setShowCreateModal(false);
-            setNewRule({ name: '', triggerType: 'EVENT', condition: '', actionType: 'EMAIL', actionConfig: '' });
+            setNewRule({
+                name: '',
+                entityType: 'LEAD',
+                triggerType: 'CREATED',
+                condition: '',
+                actionType: 'SEND_NOTIFICATION',
+                actionConfig: ''
+            });
             fetchData();
         } catch (error) {
             console.error("Failed to create rule:", error);
+            alert("Failed to create rule. Please check the inputs.");
         }
     };
 
@@ -227,17 +253,33 @@ export default function WorkflowsPage() {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Trigger Type</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Entity</label>
+                                    <select
+                                        value={newRule.entityType}
+                                        onChange={(e) => setNewRule({ ...newRule, entityType: e.target.value })}
+                                        className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 outline-none dark:text-white"
+                                    >
+                                        <option value="LEAD">Lead</option>
+                                        <option value="CUSTOMER">Customer</option>
+                                        <option value="DEAL">Deal</option>
+                                        <option value="TICKET">Ticket</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Trigger Event</label>
                                     <select
                                         value={newRule.triggerType}
                                         onChange={(e) => setNewRule({ ...newRule, triggerType: e.target.value })}
                                         className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 outline-none dark:text-white"
                                     >
-                                        <option value="EVENT">Event Based</option>
-                                        <option value="SCHEDULE">Scheduled</option>
-                                        <option value="MANUAL">Manual</option>
+                                        <option value="CREATED">Created</option>
+                                        <option value="UPDATED">Updated</option>
+                                        <option value="DELETED">Deleted</option>
+                                        <option value="STATUS_CHANGED">Status Changed</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Action Type</label>
                                     <select
@@ -245,9 +287,9 @@ export default function WorkflowsPage() {
                                         onChange={(e) => setNewRule({ ...newRule, actionType: e.target.value })}
                                         className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 outline-none dark:text-white"
                                     >
-                                        <option value="EMAIL">Send Email</option>
+                                        <option value="SEND_NOTIFICATION">In-App Notification</option>
+                                        <option value="SEND_EMAIL">Send Email</option>
                                         <option value="WEBHOOK">Send Webhook</option>
-                                        <option value="NOTIFICATION">In-App Notification</option>
                                     </select>
                                 </div>
                             </div>

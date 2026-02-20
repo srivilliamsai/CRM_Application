@@ -24,4 +24,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByCompanyName(String companyName);
 
     List<User> findByCompanyId(String companyId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT u FROM User u LEFT JOIN FETCH u.roles r LEFT JOIN FETCH r.permissions WHERE u.username = :usernameOrEmail OR u.email = :usernameOrEmail")
+    Optional<User> findUserWithRolesAndPermissions(
+            @org.springframework.data.repository.query.Param("usernameOrEmail") String usernameOrEmail);
 }

@@ -102,8 +102,12 @@ public class AuthService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        User user = userRepository.findByUsernameOrEmail(request.getUsername(), request.getUsername())
+        User user = userRepository.findUserWithRolesAndPermissions(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Update last login time
+        user.setLastLoginAt(java.time.LocalDateTime.now());
+        userRepository.save(user);
 
         java.util.Set<String> permissions = new java.util.HashSet<>();
         if (user.getRoles() != null) {
@@ -209,6 +213,20 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Permission not found: " + permissionName));
 
         user.getPermissions().remove(permission);
+        userRepository.save(user);
+    }
+
+    public void updateUserProfile(Long userId, com.crm.auth.dto.UpdateProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (request.getFullName() != null) {
+            user.setFullName(request.getFullName());
+        }
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+
         userRepository.save(user);
     }
 

@@ -60,12 +60,16 @@ function AppContent() {
     );
 }
 
+import { ThemeProvider } from './context/ThemeContext';
+
 function App() {
     return (
-        <Router>
-            <ScrollToAnchor />
-            <AppContent />
-        </Router>
+        <ThemeProvider>
+            <Router>
+                <ScrollToAnchor />
+                <AppContent />
+            </Router>
+        </ThemeProvider>
     );
 }
 

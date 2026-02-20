@@ -59,6 +59,11 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.getTicketsByCustomer(companyId, customerId));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<Ticket>> searchTickets(@RequestParam String keyword, @RequestParam String companyId) {
+        return ResponseEntity.ok(ticketService.searchTickets(companyId, keyword));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Ticket> updateTicket(@PathVariable Long id, @Valid @RequestBody TicketDTO dto) {
         return ResponseEntity.ok(ticketService.updateTicket(id, dto));

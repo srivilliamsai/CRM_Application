@@ -50,6 +50,11 @@ public class DealController {
         return ResponseEntity.ok(dealService.getDealsByAssignee(companyId, userId));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<Deal>> searchDeals(@RequestParam String keyword, @RequestParam String companyId) {
+        return ResponseEntity.ok(dealService.searchDeals(companyId, keyword));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Deal> updateDeal(@PathVariable Long id, @Valid @RequestBody DealDTO dto) {
         return ResponseEntity.ok(dealService.updateDeal(id, dto));

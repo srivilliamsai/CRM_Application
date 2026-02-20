@@ -17,5 +17,7 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
 
     List<Deal> findByCompanyIdAndAssignedTo(String companyId, Long userId);
 
+    List<Deal> findByCompanyIdAndTitleContaining(String companyId, String title);
+
     List<Deal> findByCompanyIdAndPriority(String companyId, String priority);
 }

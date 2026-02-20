@@ -57,6 +57,11 @@ public class LeadController {
         return ResponseEntity.ok(leadService.getLeadsByAssignee(companyId, userId));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<Lead>> searchLeads(@RequestParam String keyword, @RequestParam String companyId) {
+        return ResponseEntity.ok(leadService.searchLeads(companyId, keyword));
+    }
+
     @GetMapping("/high-score")
     public ResponseEntity<List<Lead>> getHighScoreLeads(@RequestParam(defaultValue = "70") Integer minScore,
             @RequestParam String companyId) {

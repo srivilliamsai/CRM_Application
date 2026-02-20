@@ -1,6 +1,9 @@
 import React, { Fragment } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getUser, logout, getUnreadCount, getNotifications, markAsRead, markAllAsRead, sendNotification, getAllUsers } from '../services/api';
+import {
+    getUser, logout, getUnreadCount, getNotifications, markAsRead, markAllAsRead, sendNotification, getAllUsers,
+    searchCustomers, searchLeads, searchDeals, searchTickets
+} from '../services/api';
 import { Bell, Search, Menu, User, Settings, LogOut, ChevronDown, Check, Shield } from 'lucide-react';
 import { Menu as HeadlessMenu, Transition, Popover, Dialog } from '@headlessui/react';
 
@@ -12,6 +15,72 @@ export default function TopBar({ toggleSidebar }) {
     const [notifications, setNotifications] = React.useState([]);
     const [isRequestModalOpen, setIsRequestModalOpen] = React.useState(false);
     const [requestMessage, setRequestMessage] = React.useState('');
+
+    // Search State
+    const [searchQuery, setSearchQuery] = React.useState('');
+    const [searchResults, setSearchResults] = React.useState({
+        customers: [],
+        leads: [],
+        deals: [],
+        tickets: []
+    });
+    const [isSearching, setIsSearching] = React.useState(false);
+
+    // Debounce Search
+    React.useEffect(() => {
+        const timer = setTimeout(async () => {
+            if (searchQuery.length >= 2) {
+                setIsSearching(true);
+                try {
+                    const [customers, leads, deals, tickets] = await Promise.all([
+                        searchCustomers(searchQuery).catch(() => []),
+                        searchLeads(searchQuery).catch(() => []),
+                        searchDeals(searchQuery).catch(() => []),
+                        searchTickets(searchQuery).catch(() => [])
+                    ]);
+
+                    setSearchResults({
+                        customers: customers.map(c => ({
+                            id: c.id,
+                            title: `${c.firstName} ${c.lastName}`,
+                            subtitle: c.email || c.company,
+                            type: 'Customer',
+                            link: `/dashboard/customers?viewId=${c.id}`
+                        })),
+                        leads: leads.map(l => ({
+                            id: l.id,
+                            title: `${l.firstName} ${l.lastName}`,
+                            subtitle: l.company || l.email,
+                            type: 'Lead',
+                            link: `/dashboard/leads?viewId=${l.id}`
+                        })),
+                        deals: deals.map(d => ({
+                            id: d.id,
+                            title: d.title,
+                            subtitle: `$${d.value?.toLocaleString()} • ${d.stage}`,
+                            type: 'Deal',
+                            link: `/dashboard/deals` // Todo: Add viewId support to DealsPage
+                        })),
+                        tickets: tickets.map(t => ({
+                            id: t.id,
+                            title: `Ticket #${t.id}: ${t.subject}`,
+                            subtitle: t.status,
+                            type: 'Ticket',
+                            link: `/dashboard/tickets` // Todo: Add viewId support to TicketsPage
+                        }))
+                    });
+                } catch (error) {
+                    console.error("Search failed", error);
+                } finally {
+                    setIsSearching(false);
+                }
+            } else {
+                setSearchResults({ customers: [], leads: [], deals: [], tickets: [] });
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
     const handleRequestAccess = async () => {
         if (!requestMessage.trim()) return;
@@ -127,13 +196,65 @@ export default function TopBar({ toggleSidebar }) {
             {/* Right: Actions */}
             <div className="flex items-center gap-4">
                 {/* Search (Visual only for now) */}
-                <div className="hidden md:flex relative">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                {/* Search */}
+                <div className="hidden md:flex relative group">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" />
                     <input
                         type="text"
-                        placeholder="Search..."
-                        className="pl-9 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border-none rounded-full text-sm focus:ring-2 focus:ring-primary/20 w-64"
+                        placeholder="Search leads, customers, deals..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border-none rounded-full text-sm focus:ring-2 focus:ring-primary/20 w-64 transition-all focus:w-80"
                     />
+
+                    {/* Search Results Dropdown */}
+                    {(searchQuery.length > 1 && (isSearching || Object.keys(searchResults).some(k => searchResults[k].length > 0))) && (
+                        <div className="absolute top-full left-0 mt-2 w-96 bg-white dark:bg-card rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 max-h-[80vh] overflow-y-auto z-50">
+                            {isSearching ? (
+                                <div className="p-4 text-center text-gray-500 text-sm">Searching...</div>
+                            ) : (
+                                <>
+                                    {Object.entries(searchResults).map(([category, items]) => (
+                                        items.length > 0 && (
+                                            <div key={category} className="py-2">
+                                                <h3 className="px-4 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider sticky top-0 bg-white/95 dark:bg-card/95 backdrop-blur-sm">
+                                                    {category} ({items.length})
+                                                </h3>
+                                                {items.map(item => (
+                                                    <div
+                                                        key={item.id}
+                                                        onClick={() => {
+                                                            navigate(item.link);
+                                                            setSearchQuery('');
+                                                            setSearchResults({ customers: [], leads: [], deals: [], tickets: [] });
+                                                        }}
+                                                        className="px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                                {item.title}
+                                                            </p>
+                                                            <p className="text-xs text-gray-500 truncate">
+                                                                {item.subtitle}
+                                                            </p>
+                                                        </div>
+                                                        <span className="text-xs text-gray-400 group-hover/item:text-primary opacity-0 group-hover/item:opacity-100 transition-all">
+                                                            Jump to
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )
+                                    ))}
+                                    {Object.values(searchResults).every(arr => arr.length === 0) && (
+                                        <div className="p-8 text-center text-gray-500 text-sm">
+                                            No results found for "{searchQuery}"
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Notifications */}

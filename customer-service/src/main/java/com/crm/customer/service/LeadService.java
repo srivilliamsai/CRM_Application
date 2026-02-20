@@ -62,6 +62,12 @@ public class LeadService {
         return leadRepository.findByCompanyIdAndAssignedTo(companyId, userId);
     }
 
+    public List<Lead> searchLeads(String companyId, String keyword) {
+        return leadRepository
+                .findByCompanyIdAndFirstNameContainingOrCompanyIdAndLastNameContainingOrCompanyIdAndEmailContainingOrCompanyIdAndCompanyContaining(
+                        companyId, keyword, companyId, keyword, companyId, keyword, companyId, keyword);
+    }
+
     public List<Lead> getHighScoreLeads(String companyId, Integer minScore) {
         return leadRepository.findByCompanyIdAndScoreGreaterThanEqual(companyId, minScore);
     }

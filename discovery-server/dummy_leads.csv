@@ -1,0 +1,11 @@
+firstName,lastName,title,email,phone,company,source,status,score,website,industry,annualRevenue,numberOfEmployees,rating,street,city,state,zipCode,country
+John,Doe,CEO,john.doe@techcorp.com,555-0101,TechCorp,Website,NEW,10,https://techcorp.com,Technology,1000000,50,HOT,123 Tech Blvd,San Francisco,CA,94105,USA
+Jane,Smith,CTO,jane.smith@innovate.io,555-0102,Innovate IO,Referral,CONTACTED,25,https://innovate.io,Software,2000000,30,WARM,456 Startup Way,Austin,TX,78701,USA
+Michael,Johnson,VP Sales,michael.j@growth.net,555-0103,Growth Dynamics,LinkedIn,QUALIFIED,60,https://growth.net,Marketing,500000,15,COLD,789 Sales Dr,Chicago,IL,60601,USA
+Emily,Davis,Director,emily.davis@healthplus.org,555-0104,HealthPlus,Conference,NEW,5,https://healthplus.org,Healthcare,5000000,100,HOT,101 Wellness Ln,Boston,MA,02108,USA
+David,Wilson,Manager,david.w@logistics.com,555-0105,Fast Logistics,Cold Call,UNQUALIFIED,0,https://logistics.com,Logistics,750000,45,COLD,202 Cargo Rd,Miami,FL,33101,USA
+Sarah,Brown,Founder,sarah.brown@designstudio.co,555-0106,Design Studio,Website,NEW,15,https://designstudio.co,Design,150000,5,WARM,303 Creative Ct,New York,NY,10001,USA
+James,Miller,COO,james.miller@manufacturing.inc,555-0107,Miller Mfg,Partner,CONTACTED,30,https://millermfg.com,Manufacturing,10000000,500,HOT,404 Industrial Pkwy,Detroit,MI,48201,USA
+Patricia,Taylor,Head of HR,patricia.t@peoplefirst.com,555-0108,People First,Referral,QUALIFIED,50,https://peoplefirst.com,HR Services,300000,10,WARM,505 Human Ave,Seattle,WA,98101,USA
+Robert,Anderson,Consultant,robert.a@consulting.grp,555-0109,Anderson Group,LinkedIn,NEW,20,https://andersongroup.com,Consulting,400000,8,HOT,606 Expert Ln,Denver,CO,80202,USA
+Linda,Thomas,Marketing Lead,linda.thomas@retail.net,555-0110,Retail Solutions,Campaign,CONTACTED,35,https://retailsolutions.net,Retail,1200000,60,WARM,707 Market St,Atlanta,GA,30301,USA

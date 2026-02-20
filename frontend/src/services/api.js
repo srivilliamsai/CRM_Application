@@ -80,6 +80,11 @@ export const updateUserRole = async (userId, role) => {
     return response.data;
 };
 
+export const updateUserProfile = async (userId, data) => {
+    const response = await AUTH_API.put(`/users/${userId}`, data);
+    return response.data;
+};
+
 export const grantPermission = async (userId, permission) => {
     const response = await AUTH_API.put(`/users/${userId}/permissions`, { permission });
     return response.data;
@@ -199,6 +204,12 @@ export const getLeadHistory = async (id) => {
     return response.data;
 };
 
+export const searchLeads = async (keyword) => {
+    const companyId = getCompanyId();
+    const response = await CUSTOMER_API.get(`/leads/search?keyword=${keyword}&companyId=${companyId}`);
+    return response.data;
+};
+
 // ============ Customers (customer-service) ============
 
 export const getAllCustomers = async () => {
@@ -294,6 +305,12 @@ export const getDealsByCustomer = async (customerId) => {
     return response.data;
 };
 
+export const searchDeals = async (keyword) => {
+    const companyId = getCompanyId();
+    const response = await SALES_API.get(`/deals/search?keyword=${keyword}&companyId=${companyId}`);
+    return response.data;
+};
+
 export const createDeal = async (data) => {
     const companyId = getCompanyId();
     const response = await SALES_API.post('/deals', { ...data, companyId });
@@ -383,6 +400,12 @@ export const getTicketsByStatus = async (status) => {
 export const getTicketsByCustomer = async (customerId) => {
     const companyId = getCompanyId();
     const response = await SUPPORT_API.get(`/tickets/customer/${customerId}?companyId=${companyId}`);
+    return response.data;
+};
+
+export const searchTickets = async (keyword) => {
+    const companyId = getCompanyId();
+    const response = await SUPPORT_API.get(`/tickets/search?keyword=${keyword}&companyId=${companyId}`);
     return response.data;
 };
 
@@ -482,7 +505,8 @@ export const getAllRules = async () => {
 };
 
 export const createRule = async (data) => {
-    const response = await WORKFLOW_API.post('/workflows/rules', data);
+    const companyId = getCompanyId();
+    const response = await WORKFLOW_API.post('/workflows/rules', { ...data, companyId });
     return response.data;
 };
 

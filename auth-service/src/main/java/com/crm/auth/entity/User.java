@@ -16,7 +16,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -25,13 +24,17 @@ import lombok.NoArgsConstructor;
         @Index(name = "idx_user_company_id", columnList = "companyId"),
         @Index(name = "idx_user_enabled", columnList = "enabled")
 })
-@Data
+@javax.persistence.EntityListeners(org.springframework.data.jpa.domain.support.AuditingEntityListener.class)
+@lombok.Getter
+@lombok.Setter
+@lombok.EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @lombok.EqualsAndHashCode.Include
     private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
@@ -67,6 +70,8 @@ public class User {
 
     private java.time.LocalDateTime updatedAt;
 
+    @org.springframework.data.annotation.CreatedBy
+    @Column(updatable = false)
     private Long createdBy;
 
     @javax.persistence.PrePersist

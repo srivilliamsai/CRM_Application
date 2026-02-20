@@ -192,7 +192,7 @@ export default function MarketingDashboard() {
                             <tbody>
                                 {recentLeads.map((lead) => (
                                     <tr key={lead.id} className="text-sm text-gray-700 dark:text-gray-300 border-b border-gray-50 dark:border-gray-800/50 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                        <td className="py-3 font-medium">{lead.name}</td>
+                                        <td className="py-3 font-medium">{lead.firstName} {lead.lastName}</td>
                                         <td className="py-3 text-gray-500">{lead.email}</td>
                                         <td className="py-3">
                                             <span className="px-2 py-1 bg-purple-50 text-purple-600 rounded-lg text-xs font-medium">
@@ -201,8 +201,8 @@ export default function MarketingDashboard() {
                                         </td>
                                         <td className="py-3">
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${lead.status === 'NEW' ? 'bg-blue-50 text-blue-600' :
-                                                    lead.status === 'CONVERTED' ? 'bg-green-50 text-green-600' :
-                                                        'bg-gray-50 text-gray-600'
+                                                lead.status === 'CONVERTED' ? 'bg-green-50 text-green-600' :
+                                                    'bg-gray-50 text-gray-600'
                                                 }`}>
                                                 {lead.status}
                                             </span>

@@ -51,12 +51,16 @@ public class TicketService {
         return ticketRepository.findByCompanyIdAndAssignedTo(companyId, userId);
     }
 
+    public List<Ticket> searchTickets(String companyId, String keyword) {
+        return ticketRepository.findByCompanyIdAndSubjectContaining(companyId, keyword);
+    }
+
     public Ticket updateTicket(Long id, TicketDTO dto) {
         Ticket ticket = getTicketById(id);
         mapDtoToEntity(dto, ticket);
         if (dto.getCompanyId() != null) {
-			ticket.setCompanyId(dto.getCompanyId());
-		}
+            ticket.setCompanyId(dto.getCompanyId());
+        }
         return ticketRepository.save(ticket);
     }
 
@@ -100,10 +104,10 @@ public class TicketService {
         ticket.setCustomerId(dto.getCustomerId());
         ticket.setAssignedTo(dto.getAssignedTo());
         if (dto.getPriority() != null) {
-			ticket.setPriority(Ticket.TicketPriority.valueOf(dto.getPriority().toUpperCase()));
-		}
+            ticket.setPriority(Ticket.TicketPriority.valueOf(dto.getPriority().toUpperCase()));
+        }
         if (dto.getStatus() != null) {
-			ticket.setStatus(Ticket.TicketStatus.valueOf(dto.getStatus().toUpperCase()));
-		}
+            ticket.setStatus(Ticket.TicketStatus.valueOf(dto.getStatus().toUpperCase()));
+        }
     }
 }

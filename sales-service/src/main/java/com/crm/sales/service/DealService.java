@@ -57,6 +57,10 @@ public class DealService {
         return dealRepository.findByCompanyIdAndAssignedTo(companyId, userId);
     }
 
+    public List<Deal> searchDeals(String companyId, String keyword) {
+        return dealRepository.findByCompanyIdAndTitleContaining(companyId, keyword);
+    }
+
     public Deal updateDeal(Long id, DealDTO dto) {
         Deal deal = getDealById(id);
         mapDtoToEntity(dto, deal);

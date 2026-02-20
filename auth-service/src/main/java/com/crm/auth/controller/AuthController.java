@@ -82,6 +82,17 @@ public class AuthController {
     }
 
     /**
+     * PUT /api/auth/users/{id}
+     * Update user profile
+     */
+    @org.springframework.web.bind.annotation.PutMapping("/users/{id}")
+    public ResponseEntity<String> updateUserProfile(@PathVariable Long id,
+            @Valid @RequestBody com.crm.auth.dto.UpdateProfileRequest request) {
+        authService.updateUserProfile(id, request);
+        return ResponseEntity.ok("User profile updated successfully!");
+    }
+
+    /**
      * PUT /api/auth/users/{id}/role
      * Update user role
      */
