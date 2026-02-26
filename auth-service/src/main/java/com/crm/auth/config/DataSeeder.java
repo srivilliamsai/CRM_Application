@@ -51,10 +51,8 @@ public class DataSeeder implements CommandLineRunner {
             }
 
             // Always ensure permissions are set (Factory Defaults)
-            java.util.Set<com.crm.auth.entity.Permission> rolePermissions = role.getPermissions();
-            if (rolePermissions == null) {
-                rolePermissions = new java.util.HashSet<>();
-            }
+            java.util.Set<com.crm.auth.entity.Permission> rolePermissions = new java.util.HashSet<>(
+                    role.getPermissions());
 
             // Assign permissions based on role
             if (roleName == Role.RoleName.ROLE_ADMIN) {

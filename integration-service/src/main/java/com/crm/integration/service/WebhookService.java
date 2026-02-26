@@ -46,7 +46,10 @@ public class WebhookService {
             result.put("status", "SUCCESS");
             result.put("httpStatus", response.getStatusCodeValue());
             result.put("response", response.getBody());
-        } catch (Exception e) {
+        } catch (org.springframework.web.client.RestClientException e) {
+            result.put("status", "FAILED");
+            result.put("error", e.getMessage());
+        } catch (RuntimeException e) {
             result.put("status", "FAILED");
             result.put("error", e.getMessage());
         }

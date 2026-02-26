@@ -1,6 +1,8 @@
 package com.crm.auth.security;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -12,21 +14,28 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.crm.auth.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor
 public class UserPrincipal implements UserDetails {
 
-    private Long id;
-    private String username;
-    private String email;
+    private final Long id;
+    private final String username;
+    private final String email;
 
     @JsonIgnore
-    private String password;
+    private final String password;
 
-    private Collection<? extends GrantedAuthority> authorities;
+    private final Collection<? extends GrantedAuthority> authorities;
+
+    public UserPrincipal(Long id, String username, String email, String password,
+            Collection<? extends GrantedAuthority> authorities) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        // Defensive copy: store an unmodifiable copy of the input collection
+        this.authorities = (authorities == null)
+                ? Collections.emptyList()
+                : Collections.unmodifiableList(new ArrayList<>(authorities));
+    }
 
     public static UserPrincipal create(User user) {
         List<GrantedAuthority> authorities = user.getRoles().stream()
@@ -41,9 +50,18 @@ public class UserPrincipal implements UserDetails {
                 authorities);
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        // Return a fresh copy to satisfy SpotBugs EI_EXPOSE_REP
+        return new ArrayList<>(authorities);
     }
 
     @Override
@@ -79,11 +97,11 @@ public class UserPrincipal implements UserDetails {
     @Override
     public boolean equals(Object o) {
         if (this == o) {
-			return true;
-		}
+            return true;
+        }
         if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
+            return false;
+        }
         UserPrincipal that = (UserPrincipal) o;
         return Objects.equals(id, that.id);
     }

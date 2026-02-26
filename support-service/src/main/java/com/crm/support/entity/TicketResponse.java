@@ -15,15 +15,18 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "ticket_responses")
-@Data
+@lombok.Getter
+@lombok.Setter
+@lombok.ToString(exclude = "ticket")
+@lombok.EqualsAndHashCode(exclude = "ticket")
 @NoArgsConstructor
-@AllArgsConstructor
+@SuppressFBWarnings(value = { "EI_EXPOSE_REP",
+        "EI_EXPOSE_REP2" }, justification = "JPA @ManyToOne entity references cannot be defensively copied without breaking Hibernate proxy tracking")
 public class TicketResponse {
 
     @Id
@@ -44,6 +47,8 @@ public class TicketResponse {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id")
     @JsonIgnore
+    @lombok.Getter(lombok.AccessLevel.NONE)
+    @lombok.Setter(lombok.AccessLevel.NONE)
     private Ticket ticket;
 
     @Column(updatable = false)
@@ -52,5 +57,27 @@ public class TicketResponse {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    // Manual getter/setter for mutable entity reference (SpotBugs EI_EXPOSE_REP
+    // fix)
+    public Ticket getTicket() {
+        return ticket;
+    }
+
+    public void setTicket(Ticket ticket) {
+        this.ticket = ticket;
+    }
+
+    // AllArgsConstructor replacement
+    public TicketResponse(Long id, String message, Long respondedBy, String responderType,
+            String companyId, Ticket ticket, LocalDateTime createdAt) {
+        this.id = id;
+        this.message = message;
+        this.respondedBy = respondedBy;
+        this.responderType = responderType;
+        this.companyId = companyId;
+        this.ticket = ticket;
+        this.createdAt = createdAt;
     }
 }

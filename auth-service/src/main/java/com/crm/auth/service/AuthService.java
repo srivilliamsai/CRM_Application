@@ -201,7 +201,9 @@ public class AuthService {
         com.crm.auth.entity.Permission permission = permissionRepository.findByName(permissionName)
                 .orElseThrow(() -> new RuntimeException("Permission not found: " + permissionName));
 
-        user.getPermissions().add(permission);
+        java.util.Set<com.crm.auth.entity.Permission> perms = new java.util.HashSet<>(user.getPermissions());
+        perms.add(permission);
+        user.setPermissions(perms);
         userRepository.save(user);
     }
 
@@ -212,7 +214,9 @@ public class AuthService {
         com.crm.auth.entity.Permission permission = permissionRepository.findByName(permissionName)
                 .orElseThrow(() -> new RuntimeException("Permission not found: " + permissionName));
 
-        user.getPermissions().remove(permission);
+        java.util.Set<com.crm.auth.entity.Permission> perms = new java.util.HashSet<>(user.getPermissions());
+        perms.remove(permission);
+        user.setPermissions(perms);
         userRepository.save(user);
     }
 
