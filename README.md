@@ -1,6 +1,6 @@
 # CRM Application — Microservices Architecture
 
-Enterprise-level Customer Relationship Management system built with **Java 8** and **Spring Boot 2.7.x**.
+Enterprise-level Customer Relationship Management system built with **Java 17** and **Spring Boot 2.7.x**.
 
 ## 🏗️ Architecture
 
@@ -14,8 +14,10 @@ Enterprise-level Customer Relationship Management system built with **Java 8** a
 | 6 | **Marketing Service** | `8084` | Campaigns, Templates, Segments |
 | 7 | **Support Service** | `8085` | Tickets, Threaded Responses |
 | 8 | **Analytics Service** | `8086` | Dashboard, Reports |
-| 9 | **Notification Service** | `8089` | In-app alerts, Email templates |
-| 10 | **Frontend App** | `5173` | React + Vite UI |
+| 9 | **Workflow Service** | `8087` | Workflow Rules, Event-Driven Automation |
+| 10 | **Integration Service** | `8088` | Email, Webhooks, External APIs |
+| 11 | **Notification Service** | `8089` | In-app alerts, Email templates |
+| 12 | **Frontend App** | `5173` | React + Vite UI |
 
 ## ✨ Key Features
 - **Microservices Architecture**: Independently deployable services.
@@ -28,7 +30,7 @@ Enterprise-level Customer Relationship Management system built with **Java 8** a
 
 ## 🛠️ Tech Stack
 
-- **Backend**: Java 8, Spring Boot 2.7.x
+- **Backend**: Java 17, Spring Boot 2.7.x
 - **Frontend**: React, Vite, TailwindCSS
 - **Database**: MySQL (database-per-service)
 - **Service Discovery**: Netflix Eureka
@@ -36,11 +38,12 @@ Enterprise-level Customer Relationship Management system built with **Java 8** a
 - **Inter-Service Communication**: OpenFeign
 - **Security**: Spring Security + JWT
 - **Build**: Maven Multi-Module
+- **Code Quality**: SpotBugs (FindBugs), SonarQube
 
 ## 🚀 How to Run
 
 ### Prerequisites
-- Java 8+
+- Java 17+
 - Maven 3.x
 - MySQL 8.x
 - Node.js 16+ (for Frontend)
@@ -61,6 +64,8 @@ java -jar sales-service/target/*.jar
 java -jar marketing-service/target/*.jar
 java -jar support-service/target/*.jar
 java -jar analytics-service/target/*.jar
+java -jar workflow-service/target/*.jar
+java -jar integration-service/target/*.jar
 java -jar notification-service/target/*.jar
 
 # 4. Start Frontend
@@ -71,6 +76,33 @@ npm run dev
 
 ### Eureka Dashboard
 Visit [http://localhost:8761](http://localhost:8761) to see registered services.
+
+## 🔍 Code Quality Tools
+
+This project uses **SpotBugs** and **SonarQube** for static code analysis.
+
+### SpotBugs (FindBugs)
+```bash
+# Run SpotBugs analysis across all services
+mvn clean install
+
+# Run SpotBugs on a specific service
+mvn spotbugs:check -pl auth-service -am
+
+# Open SpotBugs GUI for detailed bug visualization
+mvn spotbugs:gui -pl auth-service
+```
+
+### SonarQube
+```bash
+# Start SonarQube using Docker
+docker run -d --name sonarqube -p 9000:9000 sonarqube:latest
+
+# Run analysis (after SonarQube is running at http://localhost:9000)
+mvn clean verify sonar:sonar -Dsonar.host.url=http://localhost:9000
+```
+
+> **Current Status**: All 11 services pass SpotBugs with **0 bugs, 0 errors**.
 
 ## 📡 API Endpoints (via Gateway at `localhost:8080`)
 
