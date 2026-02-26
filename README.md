@@ -1,6 +1,6 @@
 # CRM Application — Microservices Architecture
 
-Enterprise-level Customer Relationship Management system built with **Java 17** and **Spring Boot 2.7.x**.
+Enterprise-level Customer Relationship Management system built with **Java 8** and **Spring Boot 2.7.x**.
 
 ## 🏗️ Architecture
 
@@ -30,7 +30,7 @@ Enterprise-level Customer Relationship Management system built with **Java 17** 
 
 ## 🛠️ Tech Stack
 
-- **Backend**: Java 17, Spring Boot 2.7.x
+- **Backend**: Java 8, Spring Boot 2.7.x
 - **Frontend**: React, Vite, TailwindCSS
 - **Database**: MySQL (database-per-service)
 - **Service Discovery**: Netflix Eureka
@@ -43,7 +43,7 @@ Enterprise-level Customer Relationship Management system built with **Java 17** 
 ## 🚀 How to Run
 
 ### Prerequisites
-- Java 17+
+- Java 8+
 - Maven 3.x
 - MySQL 8.x
 - Node.js 16+ (for Frontend)
