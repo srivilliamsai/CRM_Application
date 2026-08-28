@@ -2,7 +2,7 @@
 
 Enterprise-level Customer Relationship Management system built with **Java 8** and **Spring Boot 2.7.x**.
 
-## 🏗️ Architecture
+## ️ Architecture
 
 | # | Service | Port | Description |
 |---|---|---|---|
@@ -19,7 +19,7 @@ Enterprise-level Customer Relationship Management system built with **Java 8** a
 | 11 | **Notification Service** | `8089` | In-app alerts, Email templates |
 | 12 | **Frontend App** | `5173` | React + Vite UI |
 
-## ✨ Key Features
+##  Key Features
 - **Microservices Architecture**: Independently deployable services.
 - **Service Discovery**: Automatic registration with Eureka.
 - **API Gateway**: Centralized routing and cross-cutting concerns.
@@ -28,7 +28,7 @@ Enterprise-level Customer Relationship Management system built with **Java 8** a
 - **In-App Notifications**: Real-time alerts for assignments and updates.
 - **Dashboard Analytics**: Visual insights into sales performance.
 
-## 🛠️ Tech Stack
+## ️ Tech Stack
 
 - **Backend**: Java 8, Spring Boot 2.7.x
 - **Frontend**: React, Vite, TailwindCSS
@@ -40,7 +40,7 @@ Enterprise-level Customer Relationship Management system built with **Java 8** a
 - **Build**: Maven Multi-Module
 - **Code Quality**: SpotBugs (FindBugs), SonarQube
 
-## 🚀 How to Run
+##  How to Run
 
 ### Prerequisites
 - Java 8+
@@ -77,7 +77,7 @@ npm run dev
 ### Eureka Dashboard
 Visit [http://localhost:8761](http://localhost:8761) to see registered services.
 
-## 🔍 Code Quality Tools
+##  Code Quality Tools
 
 This project uses **SpotBugs** and **SonarQube** for static code analysis.
 
@@ -104,7 +104,7 @@ mvn clean verify sonar:sonar -Dsonar.host.url=http://localhost:9000
 
 > **Current Status**: All 11 services pass SpotBugs with **0 bugs, 0 errors**.
 
-## 📡 API Endpoints (via Gateway at `localhost:8080`)
+##  API Endpoints (via Gateway at `localhost:8080`)
 
 | Service | Endpoints |
 |---|---|
@@ -116,7 +116,7 @@ mvn clean verify sonar:sonar -Dsonar.host.url=http://localhost:9000
 | Analytics | `/api/analytics/dashboard`, `/api/analytics/reports/**` |
 | Notifications | `/api/notifications/**`, `/api/notifications/mark-read/**` |
 
-## 📂 Standard Package Structure
+##  Standard Package Structure
 ```
 com.crm.{serviceName}
 ├── config/         # Security, App config
